@@ -166,8 +166,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_stats: {
-        Args: { _user_id: string }
+      get_my_stats: {
+        Args: never
         Returns: {
           active_streak: number
           total_sessions: number
