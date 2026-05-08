@@ -69,9 +69,9 @@ function Arquetipos() {
             />
 
             <div className="glass-panel rounded-lg border border-elite/30 p-4">
-              <div className="text-mono text-tracked mb-2 text-[10px] text-elite">B · Cinco Forças Ancestrais</div>
+              <div className="text-mono text-tracked mb-2 text-[10px] text-elite">B · Sete Forças Ancestrais</div>
               <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
-                Há uma curiosidade simbólica nisso tudo: <span className="text-foreground">o Rei organiza, o Tigre conquista, o Cavalo avança, o Sábio compreende, o Golfinho conecta.</span> Civilizações antigas estruturavam seus mitos em torno dessas cinco forças humanas. A tecnologia sonora moderna apenas trocou os tambores, cantos e mantras por frequências digitais.
+                Há uma curiosidade simbólica nisso tudo: <span className="text-foreground">o Leão impõe, a Águia enxerga, a Coruja compreende, o Rei organiza, o Tigre conquista, o Cavalo avança, o Sábio decifra e o Golfinho conecta.</span> Civilizações antigas estruturavam seus mitos em torno dessas forças humanas — e o trabalho da Águia, em três alturas (força, visão e elevação), foi sempre tratado como o eixo do céu. A tecnologia sonora moderna apenas trocou os tambores, cantos e mantras por frequências digitais.
               </p>
               <ArchetypeGroup
                 title=""
