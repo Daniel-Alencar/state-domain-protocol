@@ -9,14 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RelatosRouteImport } from './routes/relatos'
 import { Route as PerformanceRouteImport } from './routes/performance'
 import { Route as NetworkingRouteImport } from './routes/networking'
 import { Route as ManualRouteImport } from './routes/manual'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as FrequenciasRouteImport } from './routes/frequencias'
 import { Route as ArquetiposRouteImport } from './routes/arquetipos'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 
+const RelatosRoute = RelatosRouteImport.update({
+  id: '/relatos',
+  path: '/relatos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerformanceRoute = PerformanceRouteImport.update({
   id: '/performance',
   path: '/performance',
@@ -30,6 +37,11 @@ const NetworkingRoute = NetworkingRouteImport.update({
 const ManualRoute = ManualRouteImport.update({
   id: '/manual',
   path: '/manual',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrequenciasRoute = FrequenciasRouteImport.update({
@@ -58,18 +70,22 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/frequencias': typeof FrequenciasRoute
+  '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
+  '/relatos': typeof RelatosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/frequencias': typeof FrequenciasRoute
+  '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
+  '/relatos': typeof RelatosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,9 +93,11 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/frequencias': typeof FrequenciasRoute
+  '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
+  '/relatos': typeof RelatosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,27 +106,33 @@ export interface FileRouteTypes {
     | '/app'
     | '/arquetipos'
     | '/frequencias'
+    | '/login'
     | '/manual'
     | '/networking'
     | '/performance'
+    | '/relatos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app'
     | '/arquetipos'
     | '/frequencias'
+    | '/login'
     | '/manual'
     | '/networking'
     | '/performance'
+    | '/relatos'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/arquetipos'
     | '/frequencias'
+    | '/login'
     | '/manual'
     | '/networking'
     | '/performance'
+    | '/relatos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,13 +140,22 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   ArquetiposRoute: typeof ArquetiposRoute
   FrequenciasRoute: typeof FrequenciasRoute
+  LoginRoute: typeof LoginRoute
   ManualRoute: typeof ManualRoute
   NetworkingRoute: typeof NetworkingRoute
   PerformanceRoute: typeof PerformanceRoute
+  RelatosRoute: typeof RelatosRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/relatos': {
+      id: '/relatos'
+      path: '/relatos'
+      fullPath: '/relatos'
+      preLoaderRoute: typeof RelatosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/performance': {
       id: '/performance'
       path: '/performance'
@@ -142,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/manual'
       fullPath: '/manual'
       preLoaderRoute: typeof ManualRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/frequencias': {
@@ -180,9 +220,11 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   ArquetiposRoute: ArquetiposRoute,
   FrequenciasRoute: FrequenciasRoute,
+  LoginRoute: LoginRoute,
   ManualRoute: ManualRoute,
   NetworkingRoute: NetworkingRoute,
   PerformanceRoute: PerformanceRoute,
+  RelatosRoute: RelatosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
