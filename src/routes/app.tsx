@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { SignalCore } from "@/components/SignalCore";
+import { ARCHETYPES } from "@/lib/archetypes";
+import { useActiveArchetype } from "@/lib/active-state";
 
 export const Route = createFileRoute("/app")({
   head: () => ({ meta: [{ title: "Centro · Protocolo Soberano" }] }),
@@ -8,6 +10,9 @@ export const Route = createFileRoute("/app")({
 });
 
 function Cockpit() {
+  const activeId = useActiveArchetype();
+  const active = ARCHETYPES.find((a) => a.id === activeId) ?? ARCHETYPES[1]; // Rocha como padrão
+
   const hour = new Date().getHours();
   const greeting =
     hour < 12
@@ -19,34 +24,37 @@ function Cockpit() {
   return (
     <AppShell>
       <div className="mx-auto max-w-5xl px-6 pb-32 pt-10 md:pt-16">
-        {/* AI greeting */}
         <div className="mb-12 text-center">
           <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
-            Frequência Base · 06:42 sessão
+            {activeId ? `Arquétipo ativo · ${active.name}` : "Frequência Base · sem arquétipo"}
           </div>
-          <p className="mx-auto max-w-xl text-lg font-light text-foreground md:text-xl">
-            {greeting}
-          </p>
+          <p className="mx-auto max-w-xl text-lg font-light text-foreground md:text-xl">{greeting}</p>
         </div>
 
-        {/* Core */}
         <div className="flex justify-center">
-          <SignalCore label="Rocha" glyph="◼" state="Estado ativo" />
+          <SignalCore label={active.name} glyph={active.glyph} state={active.state} />
         </div>
 
-        {/* Quick actions */}
         <div className="mt-12 grid grid-cols-1 gap-3 md:grid-cols-3">
           <ActionCard to="/frequencias" code="01" title="Ativar Frequência" desc="Calibrar estado mental." />
           <ActionCard to="/performance" code="02" title="Registrar Resultado" desc="Logar protocolo executado." />
           <ActionCard to="/arquetipos" code="03" title="Preparar Presença" desc="Selecionar arquétipo." />
         </div>
 
-        {/* Status strip */}
         <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border/60 md:grid-cols-4">
           <Stat label="Constância" value="14d" trend="+3" />
           <Stat label="Patente" value="Eixo Ativo" trend="42%" />
           <Stat label="Foco médio" value="2h 18m" trend="+11%" />
           <Stat label="Reconhecimentos" value="07" trend="semana" />
+        </div>
+
+        <div className="mt-10 text-center">
+          <Link
+            to="/manual"
+            className="text-mono text-tracked text-[10px] text-muted-foreground hover:text-signal"
+          >
+            Abrir Manual do Protocolo →
+          </Link>
         </div>
       </div>
     </AppShell>
