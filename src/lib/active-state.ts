@@ -64,7 +64,7 @@ export function getUserStats() {
   return readStats();
 }
 
-export function bumpSession(minutes = 0) {
+export function bumpSession(minutes = 0, payload?: { archetypeId?: string | null; frequencyIds?: string[] }) {
   if (typeof window === "undefined") return;
   const cur = readStats();
   const next: UserStats = {
@@ -74,6 +74,25 @@ export function bumpSession(minutes = 0) {
   };
   window.localStorage.setItem(STATS_KEY, JSON.stringify(next));
   statsListeners.forEach((l) => l(next));
+
+  // Sync to backend (fire-and-forget)
+  void (async () => {
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("sessions").insert({
+        user_id: user.id,
+        archetype_id: payload?.archetypeId ?? null,
+        frequency_ids: payload?.frequencyIds ?? [],
+        duration_seconds: Math.max(0, Math.round(minutes * 60)),
+      });
+      const m = await import("./use-remote-stats");
+      m.notifyStatsChanged();
+    } catch {
+      /* ignore */
+    }
+  })();
 }
 
 export function useUserStats() {
