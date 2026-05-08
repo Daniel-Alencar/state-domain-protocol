@@ -28,7 +28,7 @@ function Frequencias() {
 
   useEffect(() => subscribe(setActive), []);
 
-  function toggle(f: Frequency) {
+  function toggle(f: Frequency & { freqIdKey: string }) {
     if (isRunning(f.freqIdKey)) {
       stop(f.freqIdKey);
       toast("Frequência encerrada", { description: f.name });
