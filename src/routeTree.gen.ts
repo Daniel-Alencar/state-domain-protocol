@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PerformanceRouteImport } from './routes/performance'
 import { Route as NetworkingRouteImport } from './routes/networking'
+import { Route as ManualRouteImport } from './routes/manual'
 import { Route as FrequenciasRouteImport } from './routes/frequencias'
 import { Route as ArquetiposRouteImport } from './routes/arquetipos'
 import { Route as AppRouteImport } from './routes/app'
@@ -24,6 +25,11 @@ const PerformanceRoute = PerformanceRouteImport.update({
 const NetworkingRoute = NetworkingRouteImport.update({
   id: '/networking',
   path: '/networking',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualRoute = ManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrequenciasRoute = FrequenciasRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/frequencias': typeof FrequenciasRoute
+  '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/frequencias': typeof FrequenciasRoute
+  '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/frequencias': typeof FrequenciasRoute
+  '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/arquetipos'
     | '/frequencias'
+    | '/manual'
     | '/networking'
     | '/performance'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/arquetipos'
     | '/frequencias'
+    | '/manual'
     | '/networking'
     | '/performance'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/arquetipos'
     | '/frequencias'
+    | '/manual'
     | '/networking'
     | '/performance'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   ArquetiposRoute: typeof ArquetiposRoute
   FrequenciasRoute: typeof FrequenciasRoute
+  ManualRoute: typeof ManualRoute
   NetworkingRoute: typeof NetworkingRoute
   PerformanceRoute: typeof PerformanceRoute
 }
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/networking'
       fullPath: '/networking'
       preLoaderRoute: typeof NetworkingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manual': {
+      id: '/manual'
+      path: '/manual'
+      fullPath: '/manual'
+      preLoaderRoute: typeof ManualRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/frequencias': {
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   ArquetiposRoute: ArquetiposRoute,
   FrequenciasRoute: FrequenciasRoute,
+  ManualRoute: ManualRoute,
   NetworkingRoute: NetworkingRoute,
   PerformanceRoute: PerformanceRoute,
 }
