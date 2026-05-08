@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { LEVELS, progressToNext } from "@/lib/levels";
-import { useUserStats } from "@/lib/active-state";
+import { useRemoteStats } from "@/lib/use-remote-stats";
+import { useEntitlement } from "@/lib/use-entitlement";
 
 export const Route = createFileRoute("/performance")({
   head: () => ({ meta: [{ title: "Performance · Protocolo Soberano" }] }),
@@ -12,7 +13,8 @@ const DAYS = [3, 5, 4, 7, 6, 8, 9, 6, 7, 9, 8, 9, 10, 8];
 
 function Performance() {
   const max = Math.max(...DAYS);
-  const stats = useUserStats();
+  const { stats } = useRemoteStats();
+  const ent = useEntitlement();
   const { current, next, ratio, missing } = progressToNext({
     sessions: stats.sessions,
     streak: stats.streak,
