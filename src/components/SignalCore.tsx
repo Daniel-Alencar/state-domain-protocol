@@ -6,15 +6,21 @@ type Props = {
 
 export function SignalCore({ label = "Rocha", glyph = "◼", state = "Frequência base" }: Props) {
   return (
-    <div className="relative flex aspect-square w-full max-w-[420px] items-center justify-center">
-      {/* Outer orbit rings */}
-      <div className="absolute inset-0 rounded-full border border-border/60 animate-orbit-slow">
+    <div className="relative flex aspect-square w-full max-w-[460px] items-center justify-center animate-breathe">
+      {/* Outer cinematic rings */}
+      <div className="absolute inset-0 rounded-full border border-border/40 animate-orbit-slow">
         <div className="absolute left-1/2 top-0 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-signal" />
       </div>
-      <div className="absolute inset-8 rounded-full border border-border/40 animate-orbit-reverse">
+      <div className="absolute inset-10 rounded-full border border-border/30 animate-orbit-reverse">
         <div className="absolute left-1/2 top-0 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-elite" />
       </div>
-      <div className="absolute inset-16 rounded-full border border-border/30" />
+      <div className="absolute inset-20 rounded-full border border-border/20" />
+
+      {/* Soft halo */}
+      <div className="absolute inset-8 rounded-full" style={{
+        background: "radial-gradient(circle, color-mix(in oklab, var(--signal) 18%, transparent) 0%, transparent 65%)",
+        filter: "blur(20px)",
+      }} />
 
       {/* Core */}
       <div className="relative flex h-44 w-44 items-center justify-center">

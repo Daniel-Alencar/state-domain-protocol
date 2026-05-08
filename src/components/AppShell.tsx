@@ -2,6 +2,8 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useEntitlement } from "@/lib/use-entitlement";
+import { QuantumField } from "@/components/QuantumField";
+import { useActiveArchetype } from "@/lib/active-state";
 
 const items = [
   { to: "/app", label: "Centro", code: "01" },
@@ -17,6 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
   const ent = useEntitlement();
+  const activeArchetype = useActiveArchetype();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,9 +36,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
-      <div className="pointer-events-none fixed inset-0 grid-faint opacity-[0.04]" />
-      <div className="pointer-events-none fixed inset-0" style={{ background: "radial-gradient(ellipse at top, transparent 40%, rgba(0,0,0,0.8) 100%)" }} />
+    <div className="relative min-h-screen bg-background text-foreground" data-archetype={activeArchetype ?? "default"}>
+      <div className="pointer-events-none fixed inset-0">
+        <QuantumField variant={activeArchetype} intensity={0.7} />
+      </div>
 
       <header className="relative z-10 flex items-center justify-between border-b border-border/60 px-6 py-4">
         <Link to="/app" className="flex items-center gap-3">

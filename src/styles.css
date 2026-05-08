@@ -157,14 +157,22 @@
 }
 
 .animate-pulse-signal {
-  animation: pulse-signal 4s ease-in-out infinite;
+  animation: pulse-signal 6s ease-in-out infinite;
 }
 .animate-orbit-slow {
-  animation: orbit 40s linear infinite;
+  animation: orbit 80s linear infinite;
 }
 .animate-orbit-reverse {
-  animation: orbit 60s linear infinite reverse;
+  animation: orbit 120s linear infinite reverse;
 }
 .animate-drift {
-  animation: drift 6s ease-in-out infinite;
+  animation: drift 8s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.92; }
+  50% { transform: scale(1.015); opacity: 1; }
+}
+.animate-breathe {
+  animation: breathe 9s ease-in-out infinite;
 }

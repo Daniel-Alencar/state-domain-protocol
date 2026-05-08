@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { QuantumField } from "@/components/QuantumField";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -15,16 +16,8 @@ export const Route = createFileRoute("/")({
 function Landing() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      {/* Background field */}
-      <div className="pointer-events-none absolute inset-0 grid-faint opacity-[0.05]" />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at center, color-mix(in oklab, var(--signal) 12%, transparent) 0%, transparent 60%)" }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at top, transparent 30%, #000 100%)" }}
-      />
+      {/* Quantum field */}
+      <QuantumField />
 
       {/* Top bar */}
       <header className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12">
