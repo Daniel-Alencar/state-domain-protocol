@@ -21,10 +21,9 @@ function Arquetipos() {
 
   function activate(a: Archetype) {
     setActiveArchetype(a.id);
-    // dispara a frequência do arquétipo automaticamente
     if (!isRunning(a.freqId)) {
       start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: DEFAULT_DURATION });
-      bumpSession(DEFAULT_DURATION);
+      bumpSession(DEFAULT_DURATION, { archetypeId: a.id, frequencyIds: [a.freqId] });
     }
     toast(`Arquétipo ativo · ${a.name}`, {
       description: `${a.carrier} Hz · batida ${a.beat} Hz (${a.band}) — use fones`,
@@ -37,7 +36,7 @@ function Arquetipos() {
       toast("Frequência do arquétipo encerrada", { description: a.name });
     } else {
       start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: DEFAULT_DURATION });
-      bumpSession(DEFAULT_DURATION);
+      bumpSession(DEFAULT_DURATION, { archetypeId: a.id, frequencyIds: [a.freqId] });
       toast(`Frequência ativa · ${a.name}`, { description: `${a.carrier}/${a.beat} Hz` });
     }
   }

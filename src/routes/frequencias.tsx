@@ -35,7 +35,7 @@ function Frequencias() {
       return;
     }
     start({ freqId: f.freqIdKey, carrier: f.carrier, beat: f.beat, minutes: f.minutes });
-    bumpSession(f.minutes);
+    bumpSession(f.minutes, { frequencyIds: [f.id] });
     toast(`Frequência ativa · ${f.name}`, {
       description: `Use fones · ${f.carrier} Hz · batida ${f.beat} Hz (${f.band})`,
     });
