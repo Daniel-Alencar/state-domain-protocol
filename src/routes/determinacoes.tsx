@@ -590,7 +590,7 @@ function DeterminationCard({
             ▶ Tocar em loop
           </button>
         )}
-        <audio src={d.audioDataUrl} controls className="h-8 max-w-[180px]" />
+        {audioSrc && <audio src={audioSrc} controls className="h-8 max-w-[180px]" />}
       </div>
 
       {/* Sugestão da IA + justificativa */}
