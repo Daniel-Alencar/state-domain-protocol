@@ -55,7 +55,7 @@ export const ARCHETYPES: Archetype[] = [
     posture: "Movimento mínimo, precisão alta.",
     environment: "Política, negociação velada.",
     carrier: 174, beat: 8,
-  }),
+  }, { band: "Theta", bandLabel: "Theta Profundo / Alpha Inicial" }),
   build({
     id: "tubarao", name: "Tubarão", glyph: "◢", group: "classico",
     function: "Fechamento",
@@ -95,7 +95,7 @@ export const ARCHETYPES: Archetype[] = [
     posture: "Linha vertical perfeita.",
     environment: "Execução repetitiva de alto padrão.",
     carrier: 256, beat: 13,
-  }),
+  }, { band: "Beta", bandLabel: "Beta Inicial (SMR)" }),
   build({
     id: "fenix", name: "Fênix", glyph: "✧", group: "classico",
     function: "Recuperação",
