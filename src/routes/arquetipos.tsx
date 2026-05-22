@@ -74,7 +74,7 @@ function Arquetipos() {
               code="A"
               items={classicos}
               selectedId={selected.id}
-              activeId={activeId}
+              activeIds={activeIds}
               onSelect={setSelected}
             />
 
@@ -88,7 +88,7 @@ function Arquetipos() {
                 code=""
                 items={ancestrais}
                 selectedId={selected.id}
-                activeId={activeId}
+                activeIds={activeIds}
                 onSelect={setSelected}
                 inline
               />
@@ -148,23 +148,37 @@ function Arquetipos() {
             </div>
 
             <div className="border-t border-border/60 p-6">
-              <div className="grid gap-2 sm:grid-cols-2">
-                <button
-                  onClick={() => activate(selected)}
-                  disabled={isActive && audioOn}
-                  className="text-mono text-tracked w-full rounded-full bg-foreground px-6 py-3 text-[11px] text-background transition-transform hover:scale-[1.01] disabled:opacity-60 disabled:hover:scale-100"
-                >
-                  {isActive && audioOn ? "Arquétipo em execução" : `Ativar ${selected.name}`}
-                </button>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {isActive ? (
+                  <button
+                    onClick={() => deactivate(selected)}
+                    className="text-mono text-tracked w-full rounded-full bg-destructive px-6 py-3 text-[11px] text-destructive-foreground"
+                  >
+                    Desligar {selected.name}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => activate(selected)}
+                    className="text-mono text-tracked w-full rounded-full bg-foreground px-6 py-3 text-[11px] text-background"
+                  >
+                    Ativar {selected.name}
+                  </button>
+                )}
                 <button
                   onClick={() => toggleAudio(selected)}
                   className="text-mono text-tracked w-full rounded-full border border-border/60 px-6 py-3 text-[11px] text-foreground hover:border-signal/60"
                 >
-                  {audioOn ? "Pausar frequência" : "Apenas tocar frequência"}
+                  {audioOn ? "Pausar frequência" : "Tocar apenas frequência"}
                 </button>
+                <a
+                  href="/app"
+                  className="text-mono text-tracked w-full rounded-full border border-signal/40 px-6 py-3 text-center text-[11px] text-signal hover:bg-signal/10"
+                >
+                  Ver todos ativos
+                </a>
               </div>
               <p className="mt-3 text-center text-[10px] text-muted-foreground">
-                Use fones de ouvido. Várias frequências podem rodar em sobreposição.
+                Som binaural verdadeiro (canais separados L/R). Use fones — várias frequências rodam em sobreposição.
               </p>
             </div>
           </div>
@@ -175,13 +189,13 @@ function Arquetipos() {
 }
 
 function ArchetypeGroup({
-  title, code, items, selectedId, activeId, onSelect, inline,
+  title, code, items, selectedId, activeIds, onSelect, inline,
 }: {
   title: string;
   code: string;
   items: Archetype[];
   selectedId: string;
-  activeId: string | null;
+  activeIds: string[];
   onSelect: (a: Archetype) => void;
   inline?: boolean;
 }) {
@@ -197,7 +211,7 @@ function ArchetypeGroup({
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
         {items.map((a) => {
           const isSel = selectedId === a.id;
-          const isAct = activeId === a.id;
+          const isAct = activeIds.includes(a.id);
           return (
             <button
               key={a.id}
