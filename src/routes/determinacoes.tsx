@@ -490,6 +490,21 @@ function DeterminationCard({
   const [preset, setPreset] = useState<string[]>(
     (d.preset ?? d.suggestedArchetypes ?? []).slice(0, MAX_ACTIVE_ARCHETYPES),
   );
+  const [audioSrc, setAudioSrc] = useState<string | undefined>(d.audioDataUrl);
+  useEffect(() => {
+    let url: string | null = null;
+    if (d.hasAudio) {
+      void getAudioBlob(d.id).then((blob) => {
+        if (blob) {
+          url = URL.createObjectURL(blob);
+          setAudioSrc(url);
+        }
+      });
+    } else {
+      setAudioSrc(d.audioDataUrl);
+    }
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [d.id, d.hasAudio, d.audioDataUrl]);
 
   function saveTitle() {
     const t = titleDraft.trim();
