@@ -170,18 +170,32 @@ function Determinacoes() {
     setPendingBlob(null); setTranscript(""); setTitle("");
   }
 
-  function play(d: Determination) {
-    // pré-programados acionam automaticamente os arquétipos (até 3)
-    const preset = (d.preset ?? d.suggestedArchetypes ?? []).slice(0, MAX_ACTIVE_ARCHETYPES);
+  function play(d: Determination, presetOverride?: string[]) {
+    // usa o estado atual do card (presetOverride) — garante que o que está
+    // visível como pré-aprovado é exatamente o que vai tocar.
+    const preset = (presetOverride ?? d.preset ?? d.suggestedArchetypes ?? []).slice(
+      0,
+      MAX_ACTIVE_ARCHETYPES,
+    );
     let activated = 0;
+    let blocked = 0;
     for (const id of preset) {
-      const a = getArchetype(id); if (!a) continue;
-      if (activeArchetypes.length + activated >= MAX_ACTIVE_ARCHETYPES) break;
-      if (activateOne(a)) activated++;
+      const a = getArchetype(id);
+      if (!a) continue;
+      if (activeArchetypes.length + activated >= MAX_ACTIVE_ARCHETYPES) { blocked++; continue; }
+      if (activateOne(a)) activated++; else blocked++;
     }
+    // dispara o loop da gravação em paralelo às frequências
     setActiveDetermination(d.id);
     toast.success(`Loop ativo · ${d.title}`, {
-      description: activated ? `${activated} arquétipo(s) acionado(s) automaticamente.` : undefined,
+      description:
+        activated > 0
+          ? `${activated} frequência(s) binaural(is) acionada(s) em paralelo à voz.`
+          : preset.length === 0
+            ? "Tocando só a gravação (nenhum arquétipo pré-aprovado)."
+            : blocked > 0
+              ? "Limite de 3 arquétipos já atingido — só a gravação foi iniciada."
+              : undefined,
     });
   }
 
