@@ -35,10 +35,18 @@ export function isArchetypeActive(id: string): boolean {
   return read().includes(id);
 }
 
-export function addActiveArchetype(id: string) {
+export const MAX_ACTIVE_ARCHETYPES = 3;
+
+export function canAddArchetype(): boolean {
+  return read().length < MAX_ACTIVE_ARCHETYPES;
+}
+
+export function addActiveArchetype(id: string): boolean {
   const cur = read();
-  if (cur.includes(id)) return;
+  if (cur.includes(id)) return true;
+  if (cur.length >= MAX_ACTIVE_ARCHETYPES) return false;
   write([...cur, id]);
+  return true;
 }
 
 export function removeActiveArchetype(id: string) {
@@ -47,10 +55,12 @@ export function removeActiveArchetype(id: string) {
   write(cur.filter((x) => x !== id));
 }
 
-export function toggleActiveArchetype(id: string) {
+export function toggleActiveArchetype(id: string): boolean {
   const cur = read();
-  if (cur.includes(id)) write(cur.filter((x) => x !== id));
-  else write([...cur, id]);
+  if (cur.includes(id)) { write(cur.filter((x) => x !== id)); return true; }
+  if (cur.length >= MAX_ACTIVE_ARCHETYPES) return false;
+  write([...cur, id]);
+  return true;
 }
 
 export function clearAllActiveArchetypes() {
