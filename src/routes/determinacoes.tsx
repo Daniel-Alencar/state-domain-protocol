@@ -21,7 +21,6 @@ import {
 import {
   start,
   isRunning,
-  stop,
   stopAll,
   setMasterVolume,
   getMasterVolume,
@@ -60,15 +59,6 @@ function blobToDataUrl(blob: Blob): Promise<string> {
     r.onerror = reject;
     r.readAsDataURL(blob);
   });
-}
-
-function activateOne(a: Archetype) {
-  const ok = addActiveArchetype(a.id);
-  if (!ok) return false;
-  if (!isRunning(a.freqId)) {
-    start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: 25 });
-  }
-  return true;
 }
 
 function Determinacoes() {
