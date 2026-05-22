@@ -15,16 +15,10 @@ import {
 import { ARCHETYPES, getArchetype, type Archetype } from "@/lib/archetypes";
 import {
   addActiveArchetype,
-  useActiveArchetypes,
+  clearAllActiveArchetypes,
   MAX_ACTIVE_ARCHETYPES,
 } from "@/lib/active-state";
-import {
-  start,
-  isRunning,
-  stop,
-  setMasterVolume,
-  getMasterVolume,
-} from "@/lib/binaural-engine";
+import { start, isRunning, stopAll, setMasterVolume, getMasterVolume } from "@/lib/binaural-engine";
 import { analyzeDetermination } from "@/lib/determinations.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Slider } from "@/components/ui/slider";
@@ -36,11 +30,14 @@ export const Route = createFileRoute("/determinacoes")({
 });
 
 type SpeechRecognitionLike = {
-  lang: string; continuous: boolean; interimResults: boolean;
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
   onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
   onerror: ((e: unknown) => void) | null;
   onend: (() => void) | null;
-  start: () => void; stop: () => void;
+  start: () => void;
+  stop: () => void;
 };
 
 function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
@@ -61,19 +58,9 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-function activateOne(a: Archetype) {
-  const ok = addActiveArchetype(a.id);
-  if (!ok) return false;
-  if (!isRunning(a.freqId)) {
-    start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: 25 });
-  }
-  return true;
-}
-
 function Determinacoes() {
   const items = useDeterminations();
   const activeId = useActiveDetermination();
-  const activeArchetypes = useActiveArchetypes();
   const analyze = useServerFn(analyzeDetermination);
   const detVolume = useDeterminationVolume();
   const [masterVol, setMasterVol] = useState<number>(() => getMasterVolume());
@@ -90,11 +77,14 @@ function Determinacoes() {
 
   async function startRec() {
     try {
-      setTranscript(""); setPendingBlob(null);
+      setTranscript("");
+      setPendingBlob(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mr = new MediaRecorder(stream);
       chunksRef.current = [];
-      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
       mr.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         setPendingBlob(new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" }));
@@ -105,15 +95,26 @@ function Determinacoes() {
       const Recog = getSpeechRecognition();
       if (Recog) {
         const r = new Recog();
-        r.lang = "pt-BR"; r.continuous = true; r.interimResults = true;
+        r.lang = "pt-BR";
+        r.continuous = true;
+        r.interimResults = true;
         r.onresult = (e) => {
           let text = "";
           for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript + " ";
           setTranscript(text.trim());
         };
-        r.onerror = () => { /* ignore */ };
-        r.onend = () => { /* ignore */ };
-        try { r.start(); recogRef.current = r; } catch { /* noop */ }
+        r.onerror = () => {
+          /* ignore */
+        };
+        r.onend = () => {
+          /* ignore */
+        };
+        try {
+          r.start();
+          recogRef.current = r;
+        } catch {
+          /* noop */
+        }
       }
       setRecording(true);
     } catch (err) {
@@ -124,16 +125,28 @@ function Determinacoes() {
 
   function stopRec() {
     mediaRef.current?.stop();
-    if (recogRef.current) { try { recogRef.current.stop(); } catch { /* noop */ } recogRef.current = null; }
+    if (recogRef.current) {
+      try {
+        recogRef.current.stop();
+      } catch {
+        /* noop */
+      }
+      recogRef.current = null;
+    }
     setRecording(false);
   }
 
   /** Analisa com IA E salva — fluxo único. Exige transcrição (texto) para a IA. */
   async function analyzeAndSave() {
-    if (!pendingBlob) { toast.error("Grave o áudio primeiro."); return; }
+    if (!pendingBlob) {
+      toast.error("Grave o áudio primeiro.");
+      return;
+    }
     const text = transcript.trim();
     if (text.length < 3) {
-      toast.error("Sem transcrição — digite o que foi gravado no campo abaixo para a IA poder sugerir arquétipos.");
+      toast.error(
+        "Sem transcrição — digite o que foi gravado no campo abaixo para a IA poder sugerir arquétipos.",
+      );
       return;
     }
 
@@ -167,7 +180,9 @@ function Determinacoes() {
         ? `Determinação salva · ${suggested.length} arquétipo(s) pré-aprovado(s).`
         : "Determinação salva (IA não sugeriu arquétipos compatíveis).",
     );
-    setPendingBlob(null); setTranscript(""); setTitle("");
+    setPendingBlob(null);
+    setTranscript("");
+    setTitle("");
   }
 
   function play(d: Determination, presetOverride?: string[]) {
@@ -177,29 +192,39 @@ function Determinacoes() {
       0,
       MAX_ACTIVE_ARCHETYPES,
     );
+    stopAll();
+    clearAllActiveArchetypes();
+
     let activated = 0;
-    let blocked = 0;
+    const activatedNames: string[] = [];
     for (const id of preset) {
       const a = getArchetype(id);
       if (!a) continue;
-      if (activeArchetypes.length + activated >= MAX_ACTIVE_ARCHETYPES) { blocked++; continue; }
-      if (activateOne(a)) activated++; else blocked++;
+      if (activated >= MAX_ACTIVE_ARCHETYPES) break;
+      if (!isRunning(a.freqId)) {
+        start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: 25 });
+      }
+      addActiveArchetype(a.id);
+      activated++;
+      activatedNames.push(a.name);
     }
     // dispara o loop da gravação em paralelo às frequências
     setActiveDetermination(d.id);
     toast.success(`Loop ativo · ${d.title}`, {
       description:
         activated > 0
-          ? `${activated} frequência(s) binaural(is) acionada(s) em paralelo à voz.`
+          ? `${activatedNames.join(", ")} acionado(s) em paralelo à voz.`
           : preset.length === 0
             ? "Tocando só a gravação (nenhum arquétipo pré-aprovado)."
-            : blocked > 0
-              ? "Limite de 3 arquétipos já atingido — só a gravação foi iniciada."
-              : undefined,
+            : "Nenhum arquétipo válido foi encontrado para este mix.",
     });
   }
 
-  function stopPlay() { setActiveDetermination(null); }
+  function stopPlay() {
+    setActiveDetermination(null);
+    stopAll();
+    clearAllActiveArchetypes();
+  }
 
   useEffect(() => () => stopRec(), []);
 
@@ -207,18 +232,24 @@ function Determinacoes() {
     <AppShell>
       <div className="mx-auto max-w-5xl px-6 pb-32 pt-10">
         <div className="mb-8">
-          <div className="text-mono text-tracked mb-3 text-[10px] text-signal">Módulo 07 · Determinações</div>
-          <h1 className="text-3xl font-light text-foreground md:text-4xl">Voz em loop sobre frequência</h1>
+          <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
+            Módulo 07 · Determinações
+          </div>
+          <h1 className="text-3xl font-light text-foreground md:text-4xl">
+            Voz em loop sobre frequência
+          </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Grave sua voz declarando uma determinação. Enquanto escuta as frequências
-            dos arquétipos, esta gravação roda em loop ilimitado — mesmo com a tela
-            do celular desligada (até você sair do site ou parar manualmente).
+            Grave sua voz declarando uma determinação. Enquanto escuta as frequências dos
+            arquétipos, esta gravação roda em loop ilimitado — mesmo com a tela do celular desligada
+            (até você sair do site ou parar manualmente).
           </p>
         </div>
 
         {/* ===== Engenharia de Volumes ===== */}
         <div className="glass-panel mb-6 rounded-xl p-5">
-          <div className="text-mono text-tracked mb-3 text-[10px] text-signal">Engenharia de volumes</div>
+          <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
+            Engenharia de volumes
+          </div>
           <div className="grid gap-5 md:grid-cols-2">
             <VolumeControl
               label="Voz (sua determinação)"
@@ -230,25 +261,32 @@ function Determinacoes() {
               label="Frequências (arquétipos)"
               hint="Recomendado: 30–40% — colchão sonoro ao fundo."
               value={masterVol}
-              onChange={(v) => { setMasterVol(v); setMasterVolume(v); }}
+              onChange={(v) => {
+                setMasterVol(v);
+                setMasterVolume(v);
+              }}
             />
           </div>
         </div>
 
         {/* ===== Regra do Teto + Disclaimer de bandas ===== */}
         <div className="glass-panel mb-8 rounded-lg border border-elite/40 p-4">
-          <div className="text-mono text-tracked mb-2 text-[10px] text-elite">A regra do teto · máximo de 3 arquétipos</div>
+          <div className="text-mono text-tracked mb-2 text-[10px] text-elite">
+            A regra do teto · máximo de 3 arquétipos
+          </div>
           <p className="mb-3 text-xs leading-relaxed text-foreground/80">
-            Não jogue 10 arquétipos na mesma esteira de áudio — o cérebro sofre
-            sobrecarga de sinal. Máximo de <span className="text-foreground">3 por ciclo</span>
+            Não jogue 10 arquétipos na mesma esteira de áudio — o cérebro sofre sobrecarga de sinal.
+            Máximo de <span className="text-foreground">3 por ciclo</span>
             (um para o corpo, um para a mente, um para o negócio).
           </p>
           <details className="text-xs">
-            <summary className="cursor-pointer text-signal">Separação por frequência de batida (o segredo)</summary>
+            <summary className="cursor-pointer text-signal">
+              Separação por frequência de batida (o segredo)
+            </summary>
             <div className="mt-3 space-y-3 text-foreground/80">
               <p>
-                Misture apenas arquétipos da mesma banda cerebral (ou bandas vizinhas).
-                Misturar <span className="text-foreground">Beta (alerta)</span> com
+                Misture apenas arquétipos da mesma banda cerebral (ou bandas vizinhas). Misturar{" "}
+                <span className="text-foreground">Beta (alerta)</span> com
                 <span className="text-foreground"> Theta (sono)</span> gera paradoxo de comando.
               </p>
               <BandBreakdown />
@@ -265,11 +303,17 @@ function Determinacoes() {
             </div>
             <div className="flex items-center gap-2">
               {!recording ? (
-                <button onClick={startRec} className="text-mono text-tracked rounded-full bg-foreground px-5 py-2 text-[11px] text-background">
+                <button
+                  onClick={startRec}
+                  className="text-mono text-tracked rounded-full bg-foreground px-5 py-2 text-[11px] text-background"
+                >
                   ● Iniciar gravação
                 </button>
               ) : (
-                <button onClick={stopRec} className="text-mono text-tracked rounded-full bg-destructive px-5 py-2 text-[11px] text-destructive-foreground">
+                <button
+                  onClick={stopRec}
+                  className="text-mono text-tracked rounded-full bg-destructive px-5 py-2 text-[11px] text-destructive-foreground"
+                >
                   ■ Parar
                 </button>
               )}
@@ -285,7 +329,9 @@ function Determinacoes() {
 
           <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
             <div>
-              <label className="text-mono text-tracked text-[9px] text-muted-foreground">Título (opcional)</label>
+              <label className="text-mono text-tracked text-[9px] text-muted-foreground">
+                Título (opcional)
+              </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -298,7 +344,9 @@ function Determinacoes() {
                 Transcrição (auto no Chrome · digite no Safari/iOS/Firefox)
               </label>
               <textarea
-                value={transcript} onChange={(e) => setTranscript(e.target.value)} rows={3}
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                rows={3}
                 placeholder="A IA precisa do TEXTO da sua determinação para sugerir arquétipos. Se o navegador não transcrever automaticamente (Safari/iOS/Firefox), cole ou digite aqui o que você falou."
                 className="mt-1 w-full rounded-md border border-border/60 bg-background/40 px-3 py-2 text-sm text-foreground focus:border-signal/60 focus:outline-none"
               />
@@ -307,8 +355,9 @@ function Determinacoes() {
 
           {pendingBlob && transcript.trim().length < 3 && (
             <div className="mt-3 rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-[11px] text-destructive">
-              Áudio gravado, mas <strong>sem transcrição</strong>. A IA precisa do texto para sugerir os 3 arquétipos.
-              Digite acima o que você falou e clique em <em>Analisar com IA e salvar</em>.
+              Áudio gravado, mas <strong>sem transcrição</strong>. A IA precisa do texto para
+              sugerir os 3 arquétipos. Digite acima o que você falou e clique em{" "}
+              <em>Analisar com IA e salvar</em>.
             </div>
           )}
 
@@ -330,7 +379,9 @@ function Determinacoes() {
 
         {/* ===== Lista ===== */}
         <section className="mt-10">
-          <div className="text-mono text-tracked mb-3 text-[10px] text-signal">Suas determinações</div>
+          <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
+            Suas determinações
+          </div>
           {items.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhuma gravação ainda.</p>
           ) : (
@@ -354,13 +405,23 @@ function Determinacoes() {
 }
 
 function VolumeControl({
-  label, hint, value, onChange,
-}: { label: string; hint: string; value: number; onChange: (v: number) => void }) {
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  value: number;
+  onChange: (v: number) => void;
+}) {
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
         <span className="text-mono text-tracked text-[9px] text-muted-foreground">{label}</span>
-        <span className="text-mono text-tracked text-[10px] text-foreground">{Math.round(value * 100)}%</span>
+        <span className="text-mono text-tracked text-[10px] text-foreground">
+          {Math.round(value * 100)}%
+        </span>
       </div>
       <Slider value={[value * 100]} max={100} step={1} onValueChange={([v]) => onChange(v / 100)} />
       <p className="mt-1 text-[10px] text-muted-foreground">{hint}</p>
@@ -384,7 +445,10 @@ function BandBreakdown() {
             </div>
             <div className="flex flex-wrap gap-1">
               {grouped[b].map((a) => (
-                <span key={a.id} className="rounded-full border border-border/40 px-2 py-0.5 text-[10px]">
+                <span
+                  key={a.id}
+                  className="rounded-full border border-border/40 px-2 py-0.5 text-[10px]"
+                >
                   {a.glyph} {a.name} <span className="text-muted-foreground">· {a.beat} Hz</span>
                 </span>
               ))}
@@ -393,10 +457,12 @@ function BandBreakdown() {
         ) : null,
       )}
       <div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 md:col-span-2">
-        <div className="text-mono text-tracked mb-1 text-[9px] text-destructive">EVITAR misturas entre bandas opostas</div>
+        <div className="text-mono text-tracked mb-1 text-[9px] text-destructive">
+          EVITAR misturas entre bandas opostas
+        </div>
         <p className="text-[11px] text-foreground/80">
-          Ex.: Tubarão (18 Hz Beta — alerta) com Fênix (5 Hz Theta — sono) no mesmo áudio
-          gera paradoxo: o cérebro não sabe se acelera ou se dorme.
+          Ex.: Tubarão (18 Hz Beta — alerta) com Fênix (5 Hz Theta — sono) no mesmo áudio gera
+          paradoxo: o cérebro não sabe se acelera ou se dorme.
         </p>
       </div>
     </div>
@@ -404,10 +470,17 @@ function BandBreakdown() {
 }
 
 function DeterminationCard({
-  d, isActive, onPlay, onStop, onRemove,
+  d,
+  isActive,
+  onPlay,
+  onStop,
+  onRemove,
 }: {
-  d: Determination; isActive: boolean;
-  onPlay: (currentPreset: string[]) => void; onStop: () => void; onRemove: () => void;
+  d: Determination;
+  isActive: boolean;
+  onPlay: (currentPreset: string[]) => void;
+  onStop: () => void;
+  onRemove: () => void;
 }) {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(d.title);
@@ -441,14 +514,27 @@ function DeterminationCard({
           <div className="flex items-center gap-2">
             {editingTitle ? (
               <input
-                autoFocus value={titleDraft}
+                autoFocus
+                value={titleDraft}
                 onChange={(e) => setTitleDraft(e.target.value)}
                 onBlur={saveTitle}
-                onKeyDown={(e) => { if (e.key === "Enter") saveTitle(); if (e.key === "Escape") { setTitleDraft(d.title); setEditingTitle(false); } }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveTitle();
+                  if (e.key === "Escape") {
+                    setTitleDraft(d.title);
+                    setEditingTitle(false);
+                  }
+                }}
                 className="w-full rounded-md border border-signal/40 bg-background/60 px-2 py-1 text-sm text-foreground focus:outline-none"
               />
             ) : (
-              <button onClick={() => { setTitleDraft(d.title); setEditingTitle(true); }} className="truncate text-left text-sm font-medium text-foreground hover:text-signal">
+              <button
+                onClick={() => {
+                  setTitleDraft(d.title);
+                  setEditingTitle(true);
+                }}
+                className="truncate text-left text-sm font-medium text-foreground hover:text-signal"
+              >
                 {d.title}
               </button>
             )}
@@ -458,20 +544,31 @@ function DeterminationCard({
             {new Date(d.createdAt).toLocaleString("pt-BR")} · toque no título para editar
           </div>
         </div>
-        <button onClick={onRemove} className="text-mono text-tracked rounded-full border border-border/60 px-2 py-0.5 text-[9px] text-muted-foreground hover:text-destructive">
+        <button
+          onClick={onRemove}
+          className="text-mono text-tracked rounded-full border border-border/60 px-2 py-0.5 text-[9px] text-muted-foreground hover:text-destructive"
+        >
           excluir
         </button>
       </div>
 
-      {d.transcript && <p className="mt-2 line-clamp-3 text-xs text-foreground/80">{d.transcript}</p>}
+      {d.transcript && (
+        <p className="mt-2 line-clamp-3 text-xs text-foreground/80">{d.transcript}</p>
+      )}
 
       <div className="mt-3 flex items-center gap-2">
         {isActive ? (
-          <button onClick={onStop} className="text-mono text-tracked rounded-full bg-destructive px-4 py-1.5 text-[10px] text-destructive-foreground">
+          <button
+            onClick={onStop}
+            className="text-mono text-tracked rounded-full bg-destructive px-4 py-1.5 text-[10px] text-destructive-foreground"
+          >
             Parar loop
           </button>
         ) : (
-          <button onClick={() => onPlay(preset)} className="text-mono text-tracked rounded-full bg-foreground px-4 py-1.5 text-[10px] text-background">
+          <button
+            onClick={() => onPlay(preset)}
+            className="text-mono text-tracked rounded-full bg-foreground px-4 py-1.5 text-[10px] text-background"
+          >
             ▶ Tocar em loop
           </button>
         )}
@@ -485,9 +582,13 @@ function DeterminationCard({
           {d.rationale && <p className="mb-2 text-[11px] text-foreground/80">{d.rationale}</p>}
           <div className="flex flex-wrap gap-1">
             {d.suggestedArchetypes.map((id) => {
-              const a = getArchetype(id); if (!a) return null;
+              const a = getArchetype(id);
+              if (!a) return null;
               return (
-                <span key={id} className="rounded-full border border-signal/40 px-2 py-0.5 text-[10px] text-foreground">
+                <span
+                  key={id}
+                  className="rounded-full border border-signal/40 px-2 py-0.5 text-[10px] text-foreground"
+                >
                   {a.glyph} {a.name} <span className="text-muted-foreground">· {a.bandLabel}</span>
                 </span>
               );
@@ -499,7 +600,9 @@ function DeterminationCard({
       {/* Pré-programação de arquétipos (até 3) — pré-aprovados pela IA */}
       <div className="mt-3 rounded-md border border-signal/40 bg-signal/5 p-3">
         <div className="text-mono text-tracked mb-2 flex items-center justify-between text-[9px] text-signal">
-          <span>Pré-aprovados ({preset.length}/{MAX_ACTIVE_ARCHETYPES}) · acionam ao tocar em loop</span>
+          <span>
+            Pré-aprovados ({preset.length}/{MAX_ACTIVE_ARCHETYPES}) · acionam ao tocar em loop
+          </span>
           <span className="text-muted-foreground">clique no × para remover</span>
         </div>
 
@@ -510,7 +613,8 @@ function DeterminationCard({
         ) : (
           <div className="flex flex-wrap gap-1">
             {preset.map((id) => {
-              const a = getArchetype(id); if (!a) return null;
+              const a = getArchetype(id);
+              if (!a) return null;
               return (
                 <button
                   key={id}
@@ -518,7 +622,9 @@ function DeterminationCard({
                   title="Remover do mix"
                   className="group inline-flex items-center gap-1 rounded-full border border-signal/60 bg-signal/10 px-2 py-0.5 text-[10px] text-foreground hover:border-destructive/60 hover:bg-destructive/10"
                 >
-                  <span>{a.glyph} {a.name}</span>
+                  <span>
+                    {a.glyph} {a.name}
+                  </span>
                   <span className="text-muted-foreground group-hover:text-destructive">×</span>
                 </button>
               );
@@ -528,7 +634,9 @@ function DeterminationCard({
 
         <details className="mt-2">
           <summary className="cursor-pointer text-[10px] text-signal">
-            {preset.length < MAX_ACTIVE_ARCHETYPES ? "Adicionar / trocar arquétipos…" : "Trocar arquétipos…"}
+            {preset.length < MAX_ACTIVE_ARCHETYPES
+              ? "Adicionar / trocar arquétipos…"
+              : "Trocar arquétipos…"}
           </summary>
           <div className="mt-2 max-h-44 overflow-y-auto pr-1">
             {(["Delta", "Theta", "Alpha", "Beta", "Gamma"] as const).map((band) => {
@@ -536,13 +644,16 @@ function DeterminationCard({
               if (group.length === 0) return null;
               return (
                 <div key={band} className="mb-2">
-                  <div className="text-mono text-tracked text-[9px] text-muted-foreground">{band}</div>
+                  <div className="text-mono text-tracked text-[9px] text-muted-foreground">
+                    {band}
+                  </div>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {group.map((a) => {
                       const on = preset.includes(a.id);
                       return (
                         <button
-                          key={a.id} onClick={() => togglePreset(a.id)}
+                          key={a.id}
+                          onClick={() => togglePreset(a.id)}
                           className={`rounded-full border px-2 py-0.5 text-[10px] ${on ? "border-signal bg-signal/10 text-signal" : "border-border/60 text-muted-foreground hover:text-foreground"}`}
                         >
                           {a.glyph} {a.name}
