@@ -280,18 +280,27 @@ function Determinacoes() {
               />
             </div>
             <div>
-              <label className="text-mono text-tracked text-[9px] text-muted-foreground">Transcrição (auto / editável)</label>
+              <label className="text-mono text-tracked text-[9px] text-muted-foreground">
+                Transcrição (auto no Chrome · digite no Safari/iOS/Firefox)
+              </label>
               <textarea
                 value={transcript} onChange={(e) => setTranscript(e.target.value)} rows={3}
-                placeholder="Se o navegador não suportar transcrição automática, digite aqui o que foi gravado para a IA analisar."
+                placeholder="A IA precisa do TEXTO da sua determinação para sugerir arquétipos. Se o navegador não transcrever automaticamente (Safari/iOS/Firefox), cole ou digite aqui o que você falou."
                 className="mt-1 w-full rounded-md border border-border/60 bg-background/40 px-3 py-2 text-sm text-foreground focus:border-signal/60 focus:outline-none"
               />
             </div>
           </div>
 
+          {pendingBlob && transcript.trim().length < 3 && (
+            <div className="mt-3 rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-[11px] text-destructive">
+              Áudio gravado, mas <strong>sem transcrição</strong>. A IA precisa do texto para sugerir os 3 arquétipos.
+              Digite acima o que você falou e clique em <em>Analisar com IA e salvar</em>.
+            </div>
+          )}
+
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
-              disabled={!pendingBlob || analyzing}
+              disabled={!pendingBlob || analyzing || transcript.trim().length < 3}
               onClick={analyzeAndSave}
               className="text-mono text-tracked rounded-full bg-signal px-5 py-2 text-[11px] text-background disabled:opacity-40"
             >
