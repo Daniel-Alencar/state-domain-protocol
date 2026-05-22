@@ -130,10 +130,10 @@ export function start(opts: {
 
   left.connect(lGain).connect(merger, 0, 0);
   right.connect(rGain).connect(merger, 0, 1);
-  merger.connect(gain).connect(audio.destination);
+  merger.connect(gain).connect(masterGain ?? audio.destination);
 
-  // Volume mais baixo quando há sobreposição, para não saturar.
-  const baseTarget = opts.volume ?? 0.16;
+  // baseline por sessão; o masterGain controla o volume agregado das frequências.
+  const baseTarget = opts.volume ?? 0.5;
   const overlapDamping = 1 / Math.max(1, sessions.size + 1);
   const target = baseTarget * Math.max(0.55, overlapDamping + 0.4);
 
@@ -155,6 +155,8 @@ export function start(opts: {
     startedAt: Date.now(),
     durationMs: opts.minutes * 60_000,
   });
+
+  void import("./wake-lock").then((m) => m.enableWakeLock());
 
   if (raf == null) raf = requestAnimationFrame(tick);
   emit();
