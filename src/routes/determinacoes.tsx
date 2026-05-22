@@ -366,7 +366,7 @@ function Determinacoes() {
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
-              disabled={!pendingBlob || analyzing || transcript.trim().length < 3}
+              disabled={analyzing}
               onClick={analyzeAndSave}
               className="text-mono text-tracked rounded-full bg-signal px-5 py-2 text-[11px] text-background disabled:opacity-40"
             >
