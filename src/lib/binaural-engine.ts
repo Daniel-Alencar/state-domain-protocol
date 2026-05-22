@@ -28,11 +28,19 @@ type SessionStatus = {
 };
 
 let ctx: AudioContext | null = null;
+let masterGain: GainNode | null = null;
+let masterVolume = 0.35; // 30–40% recomendado quando há voz por cima
 const sessions = new Map<string, Session>();
 
 type Listener = (active: SessionStatus[]) => void;
 const listeners = new Set<Listener>();
 let raf: number | null = null;
+
+const VOLUME_KEY = "ps:master-volume";
+if (typeof window !== "undefined") {
+  const stored = Number(window.localStorage.getItem(VOLUME_KEY));
+  if (!Number.isNaN(stored) && stored > 0) masterVolume = stored;
+}
 
 function ensureCtx(): AudioContext {
   if (!ctx) {
@@ -40,10 +48,26 @@ function ensureCtx(): AudioContext {
       window.AudioContext ||
       (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     ctx = new AC();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = masterVolume;
+    masterGain.connect(ctx.destination);
   }
-  // iOS exige resume após interação
   if (ctx.state === "suspended") void ctx.resume();
   return ctx;
+}
+
+export function setMasterVolume(v: number) {
+  masterVolume = Math.max(0, Math.min(1, v));
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(VOLUME_KEY, String(masterVolume));
+  }
+  if (masterGain && ctx) {
+    masterGain.gain.setTargetAtTime(masterVolume, ctx.currentTime, 0.05);
+  }
+}
+
+export function getMasterVolume() {
+  return masterVolume;
 }
 
 function snapshot(): SessionStatus[] {
