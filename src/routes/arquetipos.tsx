@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { ARCHETYPES, type Archetype } from "@/lib/archetypes";
 import {
@@ -8,7 +8,7 @@ import {
   useActiveArchetypes,
   bumpSession,
 } from "@/lib/active-state";
-import { start, stop, isRunning } from "@/lib/binaural-engine";
+import { start, stop, isRunning, subscribe } from "@/lib/binaural-engine";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/arquetipos")({
@@ -20,20 +20,27 @@ const DEFAULT_DURATION = 25; // minutos
 
 function Arquetipos() {
   const [selected, setSelected] = useState<Archetype>(ARCHETYPES[0]);
+  const [runningIds, setRunningIds] = useState<string[]>([]);
   const activeIds = useActiveArchetypes();
   const isActive = activeIds.includes(selected.id);
-  const audioOn = isRunning(selected.freqId);
+  const audioOn = runningIds.includes(selected.freqId);
+
+  useEffect(
+    () => subscribe((active) => setRunningIds(active.map((s) => s.freqId))),
+    [],
+  );
 
   function activate(a: Archetype) {
-    const ok = addActiveArchetype(a.id);
-    if (!ok) {
-      toast.error("Limite de 3 arquétipos ativos. Desligue um antes de adicionar outro.");
-      return;
-    }
     if (!isRunning(a.freqId)) {
       start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: DEFAULT_DURATION });
-      bumpSession(DEFAULT_DURATION, { archetypeId: a.id, frequencyIds: [a.freqId] });
     }
+    const ok = addActiveArchetype(a.id);
+    if (!ok) {
+      stop(a.freqId);
+      toast.error("Limite de 3 arquétipos ativos. Pare uma frequência ativa ou pare o loop da determinação.");
+      return;
+    }
+    bumpSession(DEFAULT_DURATION, { archetypeId: a.id, frequencyIds: [a.freqId] });
     toast(`Arquétipo ativo · ${a.name}`, {
       description: `${a.carrier} Hz · batida ${a.beat} Hz (${a.bandLabel}) — som binaural, use fones`,
     });
