@@ -467,15 +467,39 @@ function DeterminationCard({
         </div>
       )}
 
-      {/* Pré-programação de arquétipos (até 3) */}
-      <div className="mt-3 rounded-md border border-border/40 p-3">
-        <div className="text-mono text-tracked mb-2 flex items-center justify-between text-[9px] text-elite">
-          <span>Arquétipos pré-programados ({preset.length}/{MAX_ACTIVE_ARCHETYPES})</span>
-          <span className="text-muted-foreground">acionam ao tocar em loop</span>
+      {/* Pré-programação de arquétipos (até 3) — pré-aprovados pela IA */}
+      <div className="mt-3 rounded-md border border-signal/40 bg-signal/5 p-3">
+        <div className="text-mono text-tracked mb-2 flex items-center justify-between text-[9px] text-signal">
+          <span>Pré-aprovados ({preset.length}/{MAX_ACTIVE_ARCHETYPES}) · acionam ao tocar em loop</span>
+          <span className="text-muted-foreground">clique no × para remover</span>
         </div>
-        <details>
+
+        {preset.length === 0 ? (
+          <p className="text-[11px] text-muted-foreground">
+            Nenhum arquétipo selecionado — tocará só a gravação.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-1">
+            {preset.map((id) => {
+              const a = getArchetype(id); if (!a) return null;
+              return (
+                <button
+                  key={id}
+                  onClick={() => togglePreset(id)}
+                  title="Remover do mix"
+                  className="group inline-flex items-center gap-1 rounded-full border border-signal/60 bg-signal/10 px-2 py-0.5 text-[10px] text-foreground hover:border-destructive/60 hover:bg-destructive/10"
+                >
+                  <span>{a.glyph} {a.name}</span>
+                  <span className="text-muted-foreground group-hover:text-destructive">×</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <details className="mt-2">
           <summary className="cursor-pointer text-[10px] text-signal">
-            {preset.length === 0 ? "Escolher arquétipos…" : "Editar seleção…"}
+            {preset.length < MAX_ACTIVE_ARCHETYPES ? "Adicionar / trocar arquétipos…" : "Trocar arquétipos…"}
           </summary>
           <div className="mt-2 max-h-44 overflow-y-auto pr-1">
             {(["Delta", "Theta", "Alpha", "Beta", "Gamma"] as const).map((band) => {
@@ -502,18 +526,6 @@ function DeterminationCard({
             })}
           </div>
         </details>
-        {preset.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {preset.map((id) => {
-              const a = getArchetype(id); if (!a) return null;
-              return (
-                <span key={id} className="rounded-full border border-elite/40 bg-elite/5 px-2 py-0.5 text-[10px] text-foreground">
-                  {a.glyph} {a.name}
-                </span>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );
