@@ -147,7 +147,7 @@ function Arquetipos() {
                   <span className="text-2xl font-light">{selected.beat}</span>
                   <span className="text-mono text-tracked text-[10px] text-muted-foreground"> Hz batida</span>
                 </div>
-                <div className="text-mono text-tracked text-[10px] text-elite">{selected.band}</div>
+                <div className="text-mono text-tracked text-[10px] text-elite">{selected.bandLabel}</div>
               </div>
             </div>
 
