@@ -1,30 +1,73 @@
 import { useEffect, useState } from "react";
 
-const KEY = "ps:active-archetype";
+const KEY = "ps:active-archetypes"; // agora um JSON array
+const LEGACY_KEY = "ps:active-archetype";
 const STATS_KEY = "ps:user-stats";
 
-type Listener = (value: string | null) => void;
+type Listener = (value: string[]) => void;
 const listeners = new Set<Listener>();
 
-function read(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(KEY);
+function read(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(KEY);
+    if (raw) return JSON.parse(raw) as string[];
+    // migração do formato antigo (um único arquétipo)
+    const legacy = window.localStorage.getItem(LEGACY_KEY);
+    return legacy ? [legacy] : [];
+  } catch {
+    return [];
+  }
 }
 
-export function setActiveArchetype(id: string) {
+function write(next: string[]) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, id);
-  listeners.forEach((l) => l(id));
+  const uniq = Array.from(new Set(next));
+  window.localStorage.setItem(KEY, JSON.stringify(uniq));
+  listeners.forEach((l) => l(uniq));
+}
+
+export function getActiveArchetypes(): string[] {
+  return read();
+}
+
+export function isArchetypeActive(id: string): boolean {
+  return read().includes(id);
+}
+
+export function addActiveArchetype(id: string) {
+  const cur = read();
+  if (cur.includes(id)) return;
+  write([...cur, id]);
+}
+
+export function removeActiveArchetype(id: string) {
+  const cur = read();
+  if (!cur.includes(id)) return;
+  write(cur.filter((x) => x !== id));
+}
+
+export function toggleActiveArchetype(id: string) {
+  const cur = read();
+  if (cur.includes(id)) write(cur.filter((x) => x !== id));
+  else write([...cur, id]);
+}
+
+export function clearAllActiveArchetypes() {
+  write([]);
+}
+
+/** Compatibilidade: continua funcionando para quem usa um único arquétipo. */
+export function setActiveArchetype(id: string) {
+  addActiveArchetype(id);
 }
 
 export function clearActiveArchetype() {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(KEY);
-  listeners.forEach((l) => l(null));
+  clearAllActiveArchetypes();
 }
 
-export function useActiveArchetype() {
-  const [value, setValue] = useState<string | null>(() => read());
+export function useActiveArchetypes(): string[] {
+  const [value, setValue] = useState<string[]>(() => read());
   useEffect(() => {
     setValue(read());
     const l: Listener = (v) => setValue(v);
@@ -34,6 +77,12 @@ export function useActiveArchetype() {
     };
   }, []);
   return value;
+}
+
+/** Retorna o arquétipo "primário" (último acionado) para compatibilidade. */
+export function useActiveArchetype(): string | null {
+  const arr = useActiveArchetypes();
+  return arr.length ? arr[arr.length - 1] : null;
 }
 
 // ===== Stats locais (placeholder até integração com backend) =====
@@ -75,7 +124,6 @@ export function bumpSession(minutes = 0, payload?: { archetypeId?: string | null
   window.localStorage.setItem(STATS_KEY, JSON.stringify(next));
   statsListeners.forEach((l) => l(next));
 
-  // Sync to backend (fire-and-forget)
   void (async () => {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
