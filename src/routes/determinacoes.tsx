@@ -340,7 +340,7 @@ function Determinacoes() {
                   key={d.id}
                   d={d}
                   isActive={activeId === d.id}
-                  onPlay={() => play(d)}
+                  onPlay={(currentPreset) => play(d, currentPreset)}
                   onStop={stopPlay}
                   onRemove={() => removeDetermination(d.id)}
                 />
