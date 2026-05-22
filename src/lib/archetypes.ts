@@ -293,6 +293,36 @@ export const ARCHETYPES: Archetype[] = [
     environment: "Equipes criativas, networking, eventos sociais.",
     carrier: 432, beat: 8,
   }),
+  build({
+    id: "mago-manifestacao", name: "Mago · Manifestação", glyph: "✶", group: "ancestral",
+    function: "Materialização de intenção",
+    state: "Vontade focada em forma",
+    characteristics: ["Vontade dirigida", "Visualização criadora", "Fé operacional"],
+    protocol: "Definir a imagem final. Repetir afirmação. Agir como se já fosse.",
+    posture: "Mãos abertas para frente, eixo elevado.",
+    environment: "Início de projeto, criação, lançamento.",
+    carrier: 432, beat: 10,
+  }),
+  build({
+    id: "mago-transmutacao", name: "Mago · Transmutação", glyph: "✶", group: "ancestral",
+    function: "Reconfiguração de estado",
+    state: "Alquimia interna",
+    characteristics: ["Conversão de emoção em força", "Quebra de padrão", "Reescrita simbólica"],
+    protocol: "Nomear o estado pesado. Reescrever em três palavras. Respirar 4-7-8.",
+    posture: "Mãos cruzadas no peito, respiração profunda.",
+    environment: "Bloqueio emocional, mudança de fase.",
+    carrier: 396, beat: 7,
+  }),
+  build({
+    id: "mago-visao-oculta", name: "Mago · Visão Oculta", glyph: "✶", group: "ancestral",
+    function: "Leitura do invisível",
+    state: "Percepção sutil",
+    characteristics: ["Percepção simbólica", "Intuição operacional", "Leitura de subtexto"],
+    protocol: "Silêncio absoluto antes de ler a cena. Anotar a primeira imagem.",
+    posture: "Olhos semicerrados, respiração lenta.",
+    environment: "Negociação opaca, decisão com pouca informação.",
+    carrier: 528, beat: 5,
+  }),
 ];
 
 export function getArchetype(id: string | null | undefined) {
