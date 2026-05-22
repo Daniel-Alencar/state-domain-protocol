@@ -128,27 +128,29 @@ function Determinacoes() {
     setRecording(false);
   }
 
-  /** Analisa com IA E salva — fluxo único. */
+  /** Analisa com IA E salva — fluxo único. Exige transcrição (texto) para a IA. */
   async function analyzeAndSave() {
     if (!pendingBlob) { toast.error("Grave o áudio primeiro."); return; }
     const text = transcript.trim();
+    if (text.length < 3) {
+      toast.error("Sem transcrição — digite o que foi gravado no campo abaixo para a IA poder sugerir arquétipos.");
+      return;
+    }
+
+    setAnalyzing(true);
     let suggested: string[] = [];
     let rationale = "";
-
-    if (text.length >= 3) {
-      setAnalyzing(true);
-      try {
-        const res = await analyze({ data: { transcript: text } });
-        suggested = res.suggestedArchetypes ?? [];
-        rationale = res.rationale ?? "";
-      } catch (err) {
-        console.error(err);
-        toast("IA indisponível agora — salvando sem sugestão.");
-      } finally {
-        setAnalyzing(false);
-      }
-    } else {
-      toast("Sem transcrição — salvando o áudio sem análise da IA.");
+    try {
+      const res = await analyze({ data: { transcript: text } });
+      suggested = res.suggestedArchetypes ?? [];
+      rationale = res.rationale ?? "";
+    } catch (err) {
+      console.error(err);
+      toast.error("IA indisponível agora. Tente de novo em instantes.");
+      setAnalyzing(false);
+      return;
+    } finally {
+      setAnalyzing(false);
     }
 
     const dataUrl = await blobToDataUrl(pendingBlob);
@@ -160,7 +162,11 @@ function Determinacoes() {
       rationale,
       preset: suggested.slice(0, MAX_ACTIVE_ARCHETYPES),
     });
-    toast.success(rationale ? "Determinação analisada e salva." : "Determinação salva.");
+    toast.success(
+      suggested.length
+        ? `Determinação salva · ${suggested.length} arquétipo(s) pré-aprovado(s).`
+        : "Determinação salva (IA não sugeriu arquétipos compatíveis).",
+    );
     setPendingBlob(null); setTranscript(""); setTitle("");
   }
 
