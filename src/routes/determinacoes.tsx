@@ -471,7 +471,7 @@ function DeterminationCard({
             Parar loop
           </button>
         ) : (
-          <button onClick={onPlay} className="text-mono text-tracked rounded-full bg-foreground px-4 py-1.5 text-[10px] text-background">
+          <button onClick={() => onPlay(preset)} className="text-mono text-tracked rounded-full bg-foreground px-4 py-1.5 text-[10px] text-background">
             ▶ Tocar em loop
           </button>
         )}
