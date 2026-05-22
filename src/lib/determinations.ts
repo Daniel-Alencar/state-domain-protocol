@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
+import { enableWakeLock, disableWakeLock } from "./wake-lock";
 
 export type Determination = {
   id: string;
   title: string;
   transcript: string;
-  /** data URL (base64) do áudio gravado. */
   audioDataUrl: string;
-  /** Arquétipos sugeridos pela IA. */
+  /** Sugestões da IA. */
   suggestedArchetypes: string[];
+  /** Justificativa da IA. */
+  rationale?: string;
+  /** Arquétipos pré-programados a serem acionados ao tocar (máx 3). */
+  preset?: string[];
   createdAt: number;
 };
 
 const KEY = "ps:determinations";
 const ACTIVE_KEY = "ps:determination-active";
+const VOL_KEY = "ps:determination-volume";
 
 type Listener = (d: Determination[]) => void;
 const listeners = new Set<Listener>();
@@ -33,14 +38,16 @@ function write(next: Determination[]) {
   listeners.forEach((l) => l(next));
 }
 
-export function listDeterminations() {
-  return read();
-}
+export function listDeterminations() { return read(); }
 
 export function addDetermination(d: Omit<Determination, "id" | "createdAt">) {
   const next: Determination = { ...d, id: crypto.randomUUID(), createdAt: Date.now() };
   write([next, ...read()]);
   return next;
+}
+
+export function updateDetermination(id: string, patch: Partial<Omit<Determination, "id" | "createdAt">>) {
+  write(read().map((d) => (d.id === id ? { ...d, ...patch } : d)));
 }
 
 export function removeDetermination(id: string) {
@@ -54,15 +61,33 @@ export function useDeterminations() {
     setItems(read());
     const l: Listener = (v) => setItems(v);
     listeners.add(l);
-    return () => {
-      listeners.delete(l);
-    };
+    return () => { listeners.delete(l); };
   }, []);
   return items;
 }
 
-// ===== Tocador em loop =====
+// ===== Volume da determinação =====
+let determinationVolume = 1;
+if (typeof window !== "undefined") {
+  const v = Number(window.localStorage.getItem(VOL_KEY));
+  if (!Number.isNaN(v) && v > 0) determinationVolume = v;
+}
+const volListeners = new Set<(v: number) => void>();
 
+export function getDeterminationVolume() { return determinationVolume; }
+export function setDeterminationVolume(v: number) {
+  determinationVolume = Math.max(0, Math.min(1, v));
+  if (typeof window !== "undefined") window.localStorage.setItem(VOL_KEY, String(determinationVolume));
+  if (audioEl) audioEl.volume = determinationVolume;
+  volListeners.forEach((l) => l(determinationVolume));
+}
+export function useDeterminationVolume() {
+  const [v, setV] = useState(getDeterminationVolume);
+  useEffect(() => { const l = (x: number) => setV(x); volListeners.add(l); return () => { volListeners.delete(l); }; }, []);
+  return v;
+}
+
+// ===== Tocador em loop =====
 const activeListeners = new Set<(id: string | null) => void>();
 let audioEl: HTMLAudioElement | null = null;
 
@@ -76,20 +101,19 @@ export function setActiveDetermination(id: string | null) {
   if (id) window.localStorage.setItem(ACTIVE_KEY, id);
   else window.localStorage.removeItem(ACTIVE_KEY);
 
-  // Para o áudio atual
-  if (audioEl) {
-    try { audioEl.pause(); } catch { /* noop */ }
-    audioEl = null;
-  }
+  if (audioEl) { try { audioEl.pause(); } catch { /* noop */ } audioEl = null; }
 
   if (id) {
     const item = read().find((d) => d.id === id);
     if (item) {
       audioEl = new Audio(item.audioDataUrl);
       audioEl.loop = true;
-      audioEl.volume = 0.85;
+      audioEl.volume = determinationVolume;
       void audioEl.play().catch(() => { /* iOS exige gesto */ });
+      enableWakeLock();
     }
+  } else {
+    disableWakeLock();
   }
   activeListeners.forEach((l) => l(id));
 }
@@ -100,9 +124,7 @@ export function useActiveDetermination(): string | null {
     setId(getActiveDeterminationId());
     const l = (v: string | null) => setId(v);
     activeListeners.add(l);
-    return () => {
-      activeListeners.delete(l);
-    };
+    return () => { activeListeners.delete(l); };
   }, []);
   return id;
 }
