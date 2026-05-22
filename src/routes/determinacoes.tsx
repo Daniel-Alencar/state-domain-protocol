@@ -49,14 +49,7 @@ function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result as string);
-    r.onerror = reject;
-    r.readAsDataURL(blob);
-  });
-}
+import { getAudioBlob } from "@/lib/determinations-audio";
 
 function Determinacoes() {
   const items = useDeterminations();
@@ -77,15 +70,22 @@ function Determinacoes() {
 
   async function startRec() {
     try {
+      // Para o loop anterior (voz + frequências) para não contaminar o microfone.
+      if (activeId) stopPlay();
+      // Limpa estados antigos.
       setTranscript("");
       setPendingBlob(null);
+      setAnalyzing(false);
+      mediaRef.current = null;
+      recogRef.current = null;
+      chunksRef.current = [];
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mr = new MediaRecorder(stream);
-      chunksRef.current = [];
       mr.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
-      mr.onstop = async () => {
+      mr.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
         setPendingBlob(new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" }));
       };
@@ -103,12 +103,8 @@ function Determinacoes() {
           for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript + " ";
           setTranscript(text.trim());
         };
-        r.onerror = () => {
-          /* ignore */
-        };
-        r.onend = () => {
-          /* ignore */
-        };
+        r.onerror = () => { /* ignore */ };
+        r.onend = () => { /* ignore */ };
         try {
           r.start();
           recogRef.current = r;
@@ -124,20 +120,21 @@ function Determinacoes() {
   }
 
   function stopRec() {
-    mediaRef.current?.stop();
+    try { mediaRef.current?.stop(); } catch { /* noop */ }
+    mediaRef.current = null;
     if (recogRef.current) {
-      try {
-        recogRef.current.stop();
-      } catch {
-        /* noop */
-      }
+      try { recogRef.current.stop(); } catch { /* noop */ }
       recogRef.current = null;
     }
     setRecording(false);
   }
 
-  /** Analisa com IA E salva — fluxo único. Exige transcrição (texto) para a IA. */
+  /** Analisa com IA E salva — sem limite de gravações. */
   async function analyzeAndSave() {
+    if (analyzing) {
+      toast.info("Análise em andamento, aguarde…");
+      return;
+    }
     if (!pendingBlob) {
       toast.error("Grave o áudio primeiro.");
       return;
@@ -158,32 +155,38 @@ function Determinacoes() {
       suggested = res.suggestedArchetypes ?? [];
       rationale = res.rationale ?? "";
     } catch (err) {
-      console.error(err);
+      console.error("[determinacoes] analyze failed", err);
       toast.error("IA indisponível agora. Tente de novo em instantes.");
       setAnalyzing(false);
       return;
+    }
+
+    try {
+      await addDetermination({
+        title: title.trim() || `Determinação ${new Date().toLocaleString("pt-BR")}`,
+        transcript: text,
+        audioBlob: pendingBlob,
+        suggestedArchetypes: suggested,
+        rationale,
+        preset: suggested.slice(0, MAX_ACTIVE_ARCHETYPES),
+      });
+      toast.success(
+        suggested.length
+          ? `Determinação salva · ${suggested.length} arquétipo(s) pré-aprovado(s).`
+          : "Determinação salva (IA não sugeriu arquétipos compatíveis).",
+      );
+      setPendingBlob(null);
+      setTranscript("");
+      setTitle("");
+    } catch (err) {
+      console.error("[determinacoes] save failed", err);
+      toast.error("Não foi possível salvar a gravação. Tente novamente.");
     } finally {
       setAnalyzing(false);
     }
-
-    const dataUrl = await blobToDataUrl(pendingBlob);
-    addDetermination({
-      title: title.trim() || `Determinação ${new Date().toLocaleString("pt-BR")}`,
-      transcript: text,
-      audioDataUrl: dataUrl,
-      suggestedArchetypes: suggested,
-      rationale,
-      preset: suggested.slice(0, MAX_ACTIVE_ARCHETYPES),
-    });
-    toast.success(
-      suggested.length
-        ? `Determinação salva · ${suggested.length} arquétipo(s) pré-aprovado(s).`
-        : "Determinação salva (IA não sugeriu arquétipos compatíveis).",
-    );
-    setPendingBlob(null);
-    setTranscript("");
-    setTitle("");
   }
+
+
 
   function play(d: Determination, presetOverride?: string[]) {
     // usa o estado atual do card (presetOverride) — garante que o que está
@@ -363,7 +366,7 @@ function Determinacoes() {
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
-              disabled={!pendingBlob || analyzing || transcript.trim().length < 3}
+              disabled={analyzing}
               onClick={analyzeAndSave}
               className="text-mono text-tracked rounded-full bg-signal px-5 py-2 text-[11px] text-background disabled:opacity-40"
             >
@@ -487,6 +490,21 @@ function DeterminationCard({
   const [preset, setPreset] = useState<string[]>(
     (d.preset ?? d.suggestedArchetypes ?? []).slice(0, MAX_ACTIVE_ARCHETYPES),
   );
+  const [audioSrc, setAudioSrc] = useState<string | undefined>(d.audioDataUrl);
+  useEffect(() => {
+    let url: string | null = null;
+    if (d.hasAudio) {
+      void getAudioBlob(d.id).then((blob) => {
+        if (blob) {
+          url = URL.createObjectURL(blob);
+          setAudioSrc(url);
+        }
+      });
+    } else {
+      setAudioSrc(d.audioDataUrl);
+    }
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [d.id, d.hasAudio, d.audioDataUrl]);
 
   function saveTitle() {
     const t = titleDraft.trim();
@@ -572,7 +590,7 @@ function DeterminationCard({
             ▶ Tocar em loop
           </button>
         )}
-        <audio src={d.audioDataUrl} controls className="h-8 max-w-[180px]" />
+        {audioSrc && <audio src={audioSrc} controls className="h-8 max-w-[180px]" />}
       </div>
 
       {/* Sugestão da IA + justificativa */}

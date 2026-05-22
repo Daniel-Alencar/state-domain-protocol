@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { enableWakeLock, disableWakeLock } from "./wake-lock";
 import { supabase } from "@/integrations/supabase/client";
+import { putAudio, getAudioBlob, deleteAudio } from "./determinations-audio";
 
 export type Determination = {
   id: string;
   title: string;
   transcript: string;
-  audioDataUrl: string;
+  /** Legado: gravações antigas guardadas como base64 no localStorage. Novas usam IndexedDB. */
+  audioDataUrl?: string;
+  hasAudio?: boolean;
   suggestedArchetypes: string[];
   rationale?: string;
   preset?: string[];
@@ -17,8 +20,6 @@ const BASE = "ps:determinations";
 const ACTIVE_KEY = "ps:determination-active";
 const VOL_KEY = "ps:determination-volume";
 
-// Namespace por usuário: gravações de um usuário nunca aparecem para outro
-// que use o mesmo navegador.
 let currentUserId: string | null = null;
 function storageKey() {
   return currentUserId ? `${BASE}:${currentUserId}` : `${BASE}:anon`;
@@ -59,8 +60,30 @@ if (typeof window !== "undefined") {
 
 export function listDeterminations() { return read(); }
 
-export function addDetermination(d: Omit<Determination, "id" | "createdAt">) {
-  const next: Determination = { ...d, id: crypto.randomUUID(), createdAt: Date.now() };
+/**
+ * Salva uma nova determinação. O áudio vai para IndexedDB (sem limite prático),
+ * apenas metadados ficam no localStorage.
+ */
+export async function addDetermination(input: {
+  title: string;
+  transcript: string;
+  audioBlob: Blob;
+  suggestedArchetypes: string[];
+  rationale?: string;
+  preset?: string[];
+}): Promise<Determination> {
+  const id = crypto.randomUUID();
+  await putAudio(id, input.audioBlob);
+  const next: Determination = {
+    id,
+    title: input.title,
+    transcript: input.transcript,
+    hasAudio: true,
+    suggestedArchetypes: input.suggestedArchetypes,
+    rationale: input.rationale,
+    preset: input.preset,
+    createdAt: Date.now(),
+  };
   write([next, ...read()]);
   return next;
 }
@@ -71,6 +94,7 @@ export function updateDetermination(id: string, patch: Partial<Omit<Determinatio
 
 export function removeDetermination(id: string) {
   write(read().filter((d) => d.id !== id));
+  void deleteAudio(id).catch(() => { /* noop */ });
   if (getActiveDeterminationId() === id) setActiveDetermination(null);
 }
 
@@ -109,10 +133,16 @@ export function useDeterminationVolume() {
 // ===== Tocador em loop =====
 const activeListeners = new Set<(id: string | null) => void>();
 let audioEl: HTMLAudioElement | null = null;
+let currentObjectUrl: string | null = null;
 
 export function getActiveDeterminationId(): string | null {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem(ACTIVE_KEY);
+}
+
+function teardownAudio() {
+  if (audioEl) { try { audioEl.pause(); } catch { /* noop */ } audioEl = null; }
+  if (currentObjectUrl) { try { URL.revokeObjectURL(currentObjectUrl); } catch { /* noop */ } currentObjectUrl = null; }
 }
 
 export function setActiveDetermination(id: string | null) {
@@ -120,16 +150,35 @@ export function setActiveDetermination(id: string | null) {
   if (id) window.localStorage.setItem(ACTIVE_KEY, id);
   else window.localStorage.removeItem(ACTIVE_KEY);
 
-  if (audioEl) { try { audioEl.pause(); } catch { /* noop */ } audioEl = null; }
+  teardownAudio();
 
   if (id) {
     const item = read().find((d) => d.id === id);
     if (item) {
-      audioEl = new Audio(item.audioDataUrl);
-      audioEl.loop = true;
-      audioEl.volume = determinationVolume;
-      void audioEl.play().catch(() => { /* iOS exige gesto */ });
-      enableWakeLock();
+      // Caminho novo: blob no IndexedDB.
+      if (item.hasAudio) {
+        void (async () => {
+          try {
+            const blob = await getAudioBlob(id);
+            if (!blob) return;
+            currentObjectUrl = URL.createObjectURL(blob);
+            audioEl = new Audio(currentObjectUrl);
+            audioEl.loop = true;
+            audioEl.volume = determinationVolume;
+            await audioEl.play().catch(() => { /* iOS exige gesto */ });
+            enableWakeLock();
+          } catch (e) {
+            console.error("[determinations] failed to play audio", e);
+          }
+        })();
+      } else if (item.audioDataUrl) {
+        // Legado.
+        audioEl = new Audio(item.audioDataUrl);
+        audioEl.loop = true;
+        audioEl.volume = determinationVolume;
+        void audioEl.play().catch(() => { /* iOS exige gesto */ });
+        enableWakeLock();
+      }
     }
   } else {
     disableWakeLock();
