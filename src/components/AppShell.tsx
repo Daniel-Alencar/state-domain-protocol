@@ -9,9 +9,10 @@ const items = [
   { to: "/app", label: "Centro", code: "01" },
   { to: "/frequencias", label: "Frequência", code: "02" },
   { to: "/arquetipos", label: "Arquétipos", code: "03" },
-  { to: "/relatos", label: "Relatos", code: "04" },
-  { to: "/networking", label: "Rede", code: "05" },
-  { to: "/performance", label: "Performance", code: "06" },
+  { to: "/determinacoes", label: "Determinações", code: "04" },
+  { to: "/relatos", label: "Relatos", code: "05" },
+  { to: "/networking", label: "Rede", code: "06" },
+  { to: "/performance", label: "Performance", code: "07" },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
