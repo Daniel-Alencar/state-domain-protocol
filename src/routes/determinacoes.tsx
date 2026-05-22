@@ -407,7 +407,7 @@ function DeterminationCard({
   d, isActive, onPlay, onStop, onRemove,
 }: {
   d: Determination; isActive: boolean;
-  onPlay: () => void; onStop: () => void; onRemove: () => void;
+  onPlay: (currentPreset: string[]) => void; onStop: () => void; onRemove: () => void;
 }) {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(d.title);
