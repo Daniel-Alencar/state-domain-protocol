@@ -35,7 +35,7 @@ function Arquetipos() {
       start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: DEFAULT_DURATION });
     }
     const ok = addActiveArchetype(a.id);
-    if (!ok) {
+    if (!ok && !activeIds.includes(a.id)) {
       stop(a.freqId);
       toast.error("Limite de 3 arquétipos ativos. Pare uma frequência ativa ou pare o loop da determinação.");
       return;
@@ -55,9 +55,11 @@ function Arquetipos() {
   function toggleAudio(a: Archetype) {
     if (isRunning(a.freqId)) {
       stop(a.freqId);
+      removeActiveArchetype(a.id);
       toast("Frequência encerrada", { description: a.name });
     } else {
       start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: DEFAULT_DURATION });
+      addActiveArchetype(a.id);
       bumpSession(DEFAULT_DURATION, { archetypeId: a.id, frequencyIds: [a.freqId] });
       toast(`Frequência ativa · ${a.name}`, { description: `${a.carrier}/${a.beat} Hz binaural` });
     }
