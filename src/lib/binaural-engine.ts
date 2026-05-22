@@ -178,6 +178,7 @@ export function stop(freqId: string) {
     try { s.right.stop(); } catch { /* noop */ }
   }, 500);
   sessions.delete(freqId);
+  if (sessions.size === 0) void import("./wake-lock").then((m) => m.disableWakeLock());
   emit();
 }
 
