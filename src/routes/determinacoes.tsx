@@ -15,13 +15,14 @@ import {
 import { ARCHETYPES, getArchetype, type Archetype } from "@/lib/archetypes";
 import {
   addActiveArchetype,
-  useActiveArchetypes,
+  clearAllActiveArchetypes,
   MAX_ACTIVE_ARCHETYPES,
 } from "@/lib/active-state";
 import {
   start,
   isRunning,
   stop,
+  stopAll,
   setMasterVolume,
   getMasterVolume,
 } from "@/lib/binaural-engine";
@@ -73,7 +74,6 @@ function activateOne(a: Archetype) {
 function Determinacoes() {
   const items = useDeterminations();
   const activeId = useActiveDetermination();
-  const activeArchetypes = useActiveArchetypes();
   const analyze = useServerFn(analyzeDetermination);
   const detVolume = useDeterminationVolume();
   const [masterVol, setMasterVol] = useState<number>(() => getMasterVolume());
@@ -177,29 +177,39 @@ function Determinacoes() {
       0,
       MAX_ACTIVE_ARCHETYPES,
     );
+    stopAll();
+    clearAllActiveArchetypes();
+
     let activated = 0;
-    let blocked = 0;
+    const activatedNames: string[] = [];
     for (const id of preset) {
       const a = getArchetype(id);
       if (!a) continue;
-      if (activeArchetypes.length + activated >= MAX_ACTIVE_ARCHETYPES) { blocked++; continue; }
-      if (activateOne(a)) activated++; else blocked++;
+      if (activated >= MAX_ACTIVE_ARCHETYPES) break;
+      if (!isRunning(a.freqId)) {
+        start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: 25 });
+      }
+      addActiveArchetype(a.id);
+      activated++;
+      activatedNames.push(a.name);
     }
     // dispara o loop da gravação em paralelo às frequências
     setActiveDetermination(d.id);
     toast.success(`Loop ativo · ${d.title}`, {
       description:
         activated > 0
-          ? `${activated} frequência(s) binaural(is) acionada(s) em paralelo à voz.`
+          ? `${activatedNames.join(", ")} acionado(s) em paralelo à voz.`
           : preset.length === 0
             ? "Tocando só a gravação (nenhum arquétipo pré-aprovado)."
-            : blocked > 0
-              ? "Limite de 3 arquétipos já atingido — só a gravação foi iniciada."
-              : undefined,
+            : "Nenhum arquétipo válido foi encontrado para este mix.",
     });
   }
 
-  function stopPlay() { setActiveDetermination(null); }
+  function stopPlay() {
+    setActiveDetermination(null);
+    stopAll();
+    clearAllActiveArchetypes();
+  }
 
   useEffect(() => () => stopRec(), []);
 
