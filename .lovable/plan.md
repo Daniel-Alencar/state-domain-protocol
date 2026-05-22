@@ -1,53 +1,57 @@
 ## Diagnóstico
 
-Os dois bugs têm a mesma raiz: a lista global de "arquétipos ativos" (limite de 3) está sendo consultada antes de iniciar qualquer som, e quando ela já está cheia (ou desatualizada), o código bloqueia silenciosamente o `start()` da frequência.
+O fluxo de IA + 3 arquétipos pré-aprovados + tocar em loop funciona para a primeira gravação. Para a segunda gravação o botão "Analisar com IA e salvar" parece morto. Três causas prováveis, todas reais no código atual de `src/routes/determinacoes.tsx` + `src/lib/determinations.ts`:
 
-### Bug 1 — Tocar em loop não dispara as frequências
+1. **Quota do localStorage estoura na 2ª gravação.** Hoje cada gravação é salva como `audioDataUrl` (base64) dentro de `localStorage` na chave `ps:determinations:<userId>`. Uma gravação de 20–40s em base64 já passa de 500 KB–1 MB. localStorage tem ~5 MB no total no navegador. Na 2ª ou 3ª gravação, `localStorage.setItem` lança `QuotaExceededError` silenciosamente dentro de `addDetermination → write`. O usuário vê "o botão não fez nada" porque a análise até roda, mas o save quebra sem feedback.
+2. **Estado do gravador não é totalmente resetado entre gravações.** Quando o loop anterior ainda está tocando e o usuário clica em "Iniciar gravação", o `<audio>` em loop continua reproduzindo as frequências e a voz antiga — o `SpeechRecognition` pode capturar áudio sujo, ou `getUserMedia` em alguns navegadores entra em conflito. Além disso, `mediaRef.current` e `recogRef.current` da gravação anterior não são limpos antes de iniciar a nova.
+3. **Sem feedback visível quando o botão está desabilitado.** O botão fica desabilitado se `!pendingBlob`, `analyzing` ou `transcript.trim().length < 3`. Hoje o usuário não sabe qual condição bloqueou — parece "o botão não funciona".
 
-Em `src/routes/determinacoes.tsx`, dentro de `play()`:
-
-- Antes de cada `start()`, o código verifica `activeArchetypes.length + activated >= MAX`.
-- `activeArchetypes` é um valor de hook (`useActiveArchetypes`) que pode estar com 3 IDs herdados de um loop anterior (ou de uma sessão na aba Arquétipos).
-- Resultado: o loop da voz começa, mas Tubarão / Arqueiro / Templário são contados como "bloqueados" e nunca tocam.
-
-### Bug 2 — Botão "Ativar / Tocar apenas frequência" na aba Arquétipos não emite som
-
-Em `src/routes/arquetipos.tsx`, `activate()` chama `addActiveArchetype()` antes de chamar `start()`. Se já houver 3 arquétipos no estado global (deixados ativos por uma execução anterior da aba Determinações), `addActiveArchetype` retorna `false` e o `start()` nunca é chamado. A toast de erro pode até passar despercebida.
-
-Também há um segundo detalhe: o botão usa `isRunning(selected.freqId)` sem se inscrever no engine, então o rótulo não atualiza — mas o som em si deve sair. A causa real do "não sai som" é o teto de 3 cheio.
+A regra de negócio é clara: **não pode haver limite de gravações**, cada uma com sua análise independente, e qualquer uma deve poder ser tocada em loop com suas 3 frequências pré-aprovadas.
 
 ## Correção
 
-### 1. `src/routes/determinacoes.tsx` — função `play()`
-- Ao tocar uma determinação, primeiro **parar tudo o que estava tocando** (`stopAll()` no engine e `clearAllActiveArchetypes()` no estado).
-- Em seguida, montar o mix dessa gravação a partir do `preset` visível no card (no máximo 3).
-- Para cada ID válido em `getArchetype(id)`, chamar `start({ freqId, carrier, beat, minutes: 25 })` **sincronicamente dentro do handler de clique** (sem `await` antes), para garantir o gesto do usuário no iOS/Safari.
-- Registrar os IDs no estado ativo com `addActiveArchetype` apenas para refletir a UI; ignorar o retorno (já limpamos o estado).
-- Disparar `setActiveDetermination(d.id)` por último, em paralelo às frequências.
-- Toast mostra exatamente quais arquétipos entraram com a voz.
+### 1. Mover áudio das gravações do localStorage para IndexedDB
+- Criar `src/lib/determinations-audio.ts` com helpers `putAudio(id, blob)`, `getAudioUrl(id)`, `deleteAudio(id)` usando IndexedDB (`indexedDB.open("ps-determinations", 1)` com object store `audio`). IndexedDB tem cota de centenas de MB por origem — efetivamente ilimitado para esse uso.
+- Em `src/lib/determinations.ts`:
+  - Mudar `Determination.audioDataUrl` para opcional e adicionar `hasAudio: boolean`. Não gravar mais base64 no localStorage.
+  - `addDetermination` recebe `audioBlob: Blob`, gera o id, chama `putAudio(id, blob)` e salva apenas metadados (título, transcript, suggestedArchetypes, rationale, preset, hasAudio) no localStorage.
+  - `setActiveDetermination(id)`: ao tocar, resolver a URL via `URL.createObjectURL(await getAudioBlob(id))` e revogar o objectURL no `pause`.
+  - `removeDetermination` também chama `deleteAudio(id)`.
+- Migração: gravações antigas que ainda têm `audioDataUrl` continuam funcionando (fallback). Novas usam IndexedDB.
 
-### 2. `src/routes/determinacoes.tsx` — função `stopPlay()`
-- Parar a gravação (`setActiveDetermination(null)`).
-- Parar todas as frequências do mix (`stopAll()`).
-- Limpar o estado global (`clearAllActiveArchetypes()`) para liberar o teto para o próximo play.
+Resultado: usuário pode salvar dezenas de gravações sem estourar nada.
 
-### 3. `src/routes/arquetipos.tsx` — funções `activate()` e `toggleAudio()`
-- Em `activate()`: chamar `start()` primeiro (efeito sonoro garantido dentro do gesto). Depois tentar `addActiveArchetype`; se falhar por causa do teto, mostrar uma toast clara dizendo "Limite de 3 atingido — pare uma frequência ativa ou pare o loop da determinação" e parar o som que acabou de iniciar para não ficar órfão.
-- Em `toggleAudio()`: já funciona sem passar pelo teto — manter como está, apenas garantir que `start()` rode síncrono no clique.
-- Inscrever o componente no `subscribe()` do engine para que o rótulo `audioOn` reflita o estado real em tempo real.
+### 2. Reset robusto entre gravações em `src/routes/determinacoes.tsx`
+- Em `startRec()`:
+  - Se houver loop ativo (`activeId`), parar o loop e as frequências antes de pedir o microfone (chamar `stopPlay()` interno).
+  - Limpar `mediaRef.current = null` e `recogRef.current = null` antes de instanciar novos.
+  - `chunksRef.current = []` (já existe), `setPendingBlob(null)`, `setTranscript("")`, `setAnalyzing(false)`.
+- Em `stopRec()`: garantir que `mediaRef.current = null` ao final, e que `recording` volta para `false` mesmo se `stop()` lançar.
+- `mr.onstop` continua criando o Blob e setando `pendingBlob`.
 
-### 4. Pequeno extra de robustez
-- No `binaural-engine.ts`, garantir que `ensureCtx()` chame `ctx.resume()` síncrono no primeiro `start()` (já está, mas confirmar). Sem mudança funcional se já estiver correto.
+### 3. Feedback claro no botão "Analisar com IA e salvar"
+- Mudar o botão para **sempre clicável** (remover `disabled`), e dentro de `analyzeAndSave()` validar com toast explícito:
+  - sem `pendingBlob` → "Grave o áudio primeiro." (já existe)
+  - transcript curto → "Digite o que foi falado abaixo — a IA precisa do texto para sugerir arquétipos."
+  - `analyzing` já em andamento → "Análise em andamento, aguarde."
+- Adicionar `console.log` discreto nos pontos de erro para que, se voltar a falhar, o motivo apareça na aba de logs.
+- Envolver `addDetermination` em try/catch e mostrar toast se falhar (em vez de morrer em silêncio).
+
+### 4. Tocar em loop continua igual
+- A função `play()` já está correta: para tudo, limpa o estado global, dispara as frequências do `preset` do card e o áudio da gravação em paralelo. Nenhuma mudança aqui.
+- A única diferença é que `setActiveDetermination(id)` em `determinations.ts` agora resolve o blob via IndexedDB e cria um objectURL fresco a cada play.
 
 ## Arquivos a editar
 
-- `src/routes/determinacoes.tsx` — funções `play` e `stopPlay`.
-- `src/routes/arquetipos.tsx` — funções `activate`, `toggleAudio` e assinar o engine para atualizar o rótulo.
+- `src/lib/determinations-audio.ts` — novo helper IndexedDB.
+- `src/lib/determinations.ts` — armazenar só metadados no localStorage, áudio no IndexedDB, suportar gravações legadas com `audioDataUrl`.
+- `src/routes/determinacoes.tsx` — reset robusto em `startRec`/`stopRec`, botão "Analisar" sempre clicável com validação por toast, parar loop antes de gravar de novo, try/catch em volta do save.
 
-Nenhuma mudança em schema, RLS, server functions ou no engine binaural em si.
+Nenhuma mudança de schema, RLS, server function ou no engine binaural.
 
 ## Resultado esperado
 
-- Clicar em "Tocar em loop" numa gravação com Tubarão, Arqueiro e Templário pré-aprovados → a voz entra em loop **e** as três frequências começam juntas no fone.
-- Na aba Arquétipos, clicar em "Ativar" ou "Tocar apenas frequência" → o som sai imediatamente no fone, mesmo que tenha havido um loop anterior na aba Determinações.
-- "Parar loop" e "Desligar arquétipo" deixam o sistema limpo para a próxima ativação.
+- Posso gravar 1, 5, 20 determinações. Cada uma é analisada pela IA, recebe sua sugestão de 3 arquétipos pré-aprovados e fica salva na lista.
+- Clicar em "Tocar em loop" em qualquer card dispara a voz dessa gravação **+** as 3 frequências do preset daquele card específico.
+- O botão "Analisar com IA e salvar" nunca mais "trava" sem explicação — se algo faltar, sai uma toast dizendo o quê.
+- Iniciar uma nova gravação para automaticamente o loop anterior, evitando contaminação do microfone.
