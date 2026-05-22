@@ -4,6 +4,8 @@ import { AppShell } from "@/components/AppShell";
 import { ARCHETYPES, type Archetype } from "@/lib/archetypes";
 import {
   addActiveArchetype,
+  clearAllActiveArchetypes,
+  MAX_ACTIVE_ARCHETYPES,
   removeActiveArchetype,
   useActiveArchetypes,
   bumpSession,
@@ -30,15 +32,32 @@ function Arquetipos() {
     [],
   );
 
+  function runningArchetypeIds(extraId?: string) {
+    const ids = runningIds
+      .map((freqId) => ARCHETYPES.find((a) => a.freqId === freqId)?.id)
+      .filter((id): id is string => Boolean(id));
+    return Array.from(new Set(extraId ? [...ids, extraId] : ids));
+  }
+
+  function syncActiveState(extraId?: string) {
+    clearAllActiveArchetypes();
+    runningArchetypeIds(extraId)
+      .slice(0, MAX_ACTIVE_ARCHETYPES)
+      .forEach((id) => addActiveArchetype(id));
+  }
+
   function activate(a: Archetype) {
+    const actualRunning = runningArchetypeIds();
+    if (!actualRunning.includes(a.id) && actualRunning.length >= MAX_ACTIVE_ARCHETYPES) {
+      toast.error("Limite de 3 arquétipos ativos. Pare uma frequência ativa ou pare o loop da determinação.");
+      return;
+    }
     if (!isRunning(a.freqId)) {
       start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: DEFAULT_DURATION });
     }
     const ok = addActiveArchetype(a.id);
     if (!ok && !activeIds.includes(a.id)) {
-      stop(a.freqId);
-      toast.error("Limite de 3 arquétipos ativos. Pare uma frequência ativa ou pare o loop da determinação.");
-      return;
+      syncActiveState(a.id);
     }
     bumpSession(DEFAULT_DURATION, { archetypeId: a.id, frequencyIds: [a.freqId] });
     toast(`Arquétipo ativo · ${a.name}`, {
