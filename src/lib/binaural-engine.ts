@@ -28,11 +28,19 @@ type SessionStatus = {
 };
 
 let ctx: AudioContext | null = null;
+let masterGain: GainNode | null = null;
+let masterVolume = 0.35; // 30–40% recomendado quando há voz por cima
 const sessions = new Map<string, Session>();
 
 type Listener = (active: SessionStatus[]) => void;
 const listeners = new Set<Listener>();
 let raf: number | null = null;
+
+const VOLUME_KEY = "ps:master-volume";
+if (typeof window !== "undefined") {
+  const stored = Number(window.localStorage.getItem(VOLUME_KEY));
+  if (!Number.isNaN(stored) && stored > 0) masterVolume = stored;
+}
 
 function ensureCtx(): AudioContext {
   if (!ctx) {
@@ -40,10 +48,26 @@ function ensureCtx(): AudioContext {
       window.AudioContext ||
       (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     ctx = new AC();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = masterVolume;
+    masterGain.connect(ctx.destination);
   }
-  // iOS exige resume após interação
   if (ctx.state === "suspended") void ctx.resume();
   return ctx;
+}
+
+export function setMasterVolume(v: number) {
+  masterVolume = Math.max(0, Math.min(1, v));
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(VOLUME_KEY, String(masterVolume));
+  }
+  if (masterGain && ctx) {
+    masterGain.gain.setTargetAtTime(masterVolume, ctx.currentTime, 0.05);
+  }
+}
+
+export function getMasterVolume() {
+  return masterVolume;
 }
 
 function snapshot(): SessionStatus[] {
@@ -106,10 +130,10 @@ export function start(opts: {
 
   left.connect(lGain).connect(merger, 0, 0);
   right.connect(rGain).connect(merger, 0, 1);
-  merger.connect(gain).connect(audio.destination);
+  merger.connect(gain).connect(masterGain ?? audio.destination);
 
-  // Volume mais baixo quando há sobreposição, para não saturar.
-  const baseTarget = opts.volume ?? 0.16;
+  // baseline por sessão; o masterGain controla o volume agregado das frequências.
+  const baseTarget = opts.volume ?? 0.5;
   const overlapDamping = 1 / Math.max(1, sessions.size + 1);
   const target = baseTarget * Math.max(0.55, overlapDamping + 0.4);
 
@@ -132,6 +156,8 @@ export function start(opts: {
     durationMs: opts.minutes * 60_000,
   });
 
+  void import("./wake-lock").then((m) => m.enableWakeLock());
+
   if (raf == null) raf = requestAnimationFrame(tick);
   emit();
 }
@@ -152,6 +178,7 @@ export function stop(freqId: string) {
     try { s.right.stop(); } catch { /* noop */ }
   }, 500);
   sessions.delete(freqId);
+  if (sessions.size === 0) void import("./wake-lock").then((m) => m.disableWakeLock());
   emit();
 }
 

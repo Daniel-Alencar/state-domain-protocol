@@ -5,25 +5,18 @@ export type Archetype = {
   name: string;
   glyph: string;
   group: ArchetypeGroup;
-  /** Função operacional resumida. */
   function: string;
-  /** Estado mental induzido. */
   state: string;
-  /** Pelo menos três características-chave. */
   characteristics: string[];
-  /** Protocolo prático. */
   protocol: string;
-  /** Postura corporal. */
   posture: string;
-  /** Ambiente ideal. */
   environment: string;
-  /** Frequência portadora (Hz) — som ouvido em ambos os canais. */
   carrier: number;
-  /** Diferença binaural (Hz) entre canais — a batida cerebral. */
   beat: number;
-  /** Banda cerebral induzida pela batida. */
+  /** Banda cerebral (para regras de compatibilidade de mix). */
   band: "Delta" | "Theta" | "Alpha" | "Beta" | "Gamma";
-  /** Identificador único da assinatura sonora (para o motor). */
+  /** Rótulo legível (pode trazer sufixos como "Beta (SMR)" ou "Theta/Alpha"). */
+  bandLabel: string;
   freqId: string;
 };
 
@@ -35,8 +28,10 @@ function bandFor(beat: number): Archetype["band"] {
   return "Gamma";
 }
 
-function build(a: Omit<Archetype, "band" | "freqId">): Archetype {
-  return { ...a, band: bandFor(a.beat), freqId: `arq:${a.id}` };
+type Override = { band?: Archetype["band"]; bandLabel?: string };
+function build(a: Omit<Archetype, "band" | "bandLabel" | "freqId">, override: Override = {}): Archetype {
+  const band = override.band ?? bandFor(a.beat);
+  return { ...a, band, bandLabel: override.bandLabel ?? band, freqId: `arq:${a.id}` };
 }
 
 export const ARCHETYPES: Archetype[] = [
@@ -60,7 +55,7 @@ export const ARCHETYPES: Archetype[] = [
     posture: "Movimento mínimo, precisão alta.",
     environment: "Política, negociação velada.",
     carrier: 174, beat: 8,
-  }),
+  }, { band: "Theta", bandLabel: "Theta Profundo / Alpha Inicial" }),
   build({
     id: "tubarao", name: "Tubarão", glyph: "◢", group: "classico",
     function: "Fechamento",
@@ -100,7 +95,7 @@ export const ARCHETYPES: Archetype[] = [
     posture: "Linha vertical perfeita.",
     environment: "Execução repetitiva de alto padrão.",
     carrier: 256, beat: 13,
-  }),
+  }, { band: "Beta", bandLabel: "Beta Inicial (SMR)" }),
   build({
     id: "fenix", name: "Fênix", glyph: "✧", group: "classico",
     function: "Recuperação",
