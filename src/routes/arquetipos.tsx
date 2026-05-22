@@ -2,7 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { ARCHETYPES, type Archetype } from "@/lib/archetypes";
-import { setActiveArchetype, useActiveArchetype, bumpSession } from "@/lib/active-state";
+import {
+  addActiveArchetype,
+  removeActiveArchetype,
+  useActiveArchetypes,
+  bumpSession,
+} from "@/lib/active-state";
 import { start, stop, isRunning } from "@/lib/binaural-engine";
 import { toast } from "sonner";
 
@@ -15,29 +20,35 @@ const DEFAULT_DURATION = 25; // minutos
 
 function Arquetipos() {
   const [selected, setSelected] = useState<Archetype>(ARCHETYPES[0]);
-  const activeId = useActiveArchetype();
-  const isActive = activeId === selected.id;
+  const activeIds = useActiveArchetypes();
+  const isActive = activeIds.includes(selected.id);
   const audioOn = isRunning(selected.freqId);
 
   function activate(a: Archetype) {
-    setActiveArchetype(a.id);
+    addActiveArchetype(a.id);
     if (!isRunning(a.freqId)) {
       start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: DEFAULT_DURATION });
       bumpSession(DEFAULT_DURATION, { archetypeId: a.id, frequencyIds: [a.freqId] });
     }
     toast(`Arquétipo ativo · ${a.name}`, {
-      description: `${a.carrier} Hz · batida ${a.beat} Hz (${a.band}) — use fones`,
+      description: `${a.carrier} Hz · batida ${a.beat} Hz (${a.band}) — som binaural, use fones`,
     });
+  }
+
+  function deactivate(a: Archetype) {
+    removeActiveArchetype(a.id);
+    if (isRunning(a.freqId)) stop(a.freqId);
+    toast("Arquétipo desligado", { description: a.name });
   }
 
   function toggleAudio(a: Archetype) {
     if (isRunning(a.freqId)) {
       stop(a.freqId);
-      toast("Frequência do arquétipo encerrada", { description: a.name });
+      toast("Frequência encerrada", { description: a.name });
     } else {
       start({ freqId: a.freqId, carrier: a.carrier, beat: a.beat, minutes: DEFAULT_DURATION });
       bumpSession(DEFAULT_DURATION, { archetypeId: a.id, frequencyIds: [a.freqId] });
-      toast(`Frequência ativa · ${a.name}`, { description: `${a.carrier}/${a.beat} Hz` });
+      toast(`Frequência ativa · ${a.name}`, { description: `${a.carrier}/${a.beat} Hz binaural` });
     }
   }
 
