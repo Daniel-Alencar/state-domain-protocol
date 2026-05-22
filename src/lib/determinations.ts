@@ -1,23 +1,28 @@
 import { useEffect, useState } from "react";
 import { enableWakeLock, disableWakeLock } from "./wake-lock";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Determination = {
   id: string;
   title: string;
   transcript: string;
   audioDataUrl: string;
-  /** Sugestões da IA. */
   suggestedArchetypes: string[];
-  /** Justificativa da IA. */
   rationale?: string;
-  /** Arquétipos pré-programados a serem acionados ao tocar (máx 3). */
   preset?: string[];
   createdAt: number;
 };
 
-const KEY = "ps:determinations";
+const BASE = "ps:determinations";
 const ACTIVE_KEY = "ps:determination-active";
 const VOL_KEY = "ps:determination-volume";
+
+// Namespace por usuário: gravações de um usuário nunca aparecem para outro
+// que use o mesmo navegador.
+let currentUserId: string | null = null;
+function storageKey() {
+  return currentUserId ? `${BASE}:${currentUserId}` : `${BASE}:anon`;
+}
 
 type Listener = (d: Determination[]) => void;
 const listeners = new Set<Listener>();
@@ -25,7 +30,7 @@ const listeners = new Set<Listener>();
 function read(): Determination[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = window.localStorage.getItem(storageKey());
     return raw ? (JSON.parse(raw) as Determination[]) : [];
   } catch {
     return [];
@@ -34,8 +39,22 @@ function read(): Determination[] {
 
 function write(next: Determination[]) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, JSON.stringify(next));
+  window.localStorage.setItem(storageKey(), JSON.stringify(next));
   listeners.forEach((l) => l(next));
+}
+
+if (typeof window !== "undefined") {
+  supabase.auth.getUser().then(({ data }) => {
+    currentUserId = data.user?.id ?? null;
+    listeners.forEach((l) => l(read()));
+  });
+  supabase.auth.onAuthStateChange((_e, session) => {
+    const next = session?.user?.id ?? null;
+    if (next === currentUserId) return;
+    try { setActiveDetermination(null); } catch { /* noop */ }
+    currentUserId = next;
+    listeners.forEach((l) => l(read()));
+  });
 }
 
 export function listDeterminations() { return read(); }
