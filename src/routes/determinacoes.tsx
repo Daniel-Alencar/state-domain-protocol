@@ -78,7 +78,9 @@ function Determinacoes() {
         setPendingBlob(new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" }));
         setRecording(false);
         if (!manualStopRef.current) {
-          toast.error("A gravação foi interrompida pelo navegador. Mantenha esta tela aberta e tente novamente.");
+          toast.error(
+            "A gravação foi interrompida pelo navegador. Mantenha esta tela aberta e tente novamente.",
+          );
         }
       };
       mr.onerror = () => {
@@ -99,7 +101,11 @@ function Determinacoes() {
     manualStopRef.current = true;
     const recorder = mediaRef.current;
     if (recorder && recorder.state !== "inactive") {
-      try { recorder.stop(); } catch { /* noop */ }
+      try {
+        recorder.stop();
+      } catch {
+        /* noop */
+      }
     } else {
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
@@ -165,8 +171,6 @@ function Determinacoes() {
       setAnalyzing(false);
     }
   }
-
-
 
   function play(d: Determination, presetOverride?: string[]) {
     // usa o estado atual do card (presetOverride) — garante que o que está
