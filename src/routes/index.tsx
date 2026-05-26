@@ -58,27 +58,11 @@ function Landing() {
 
         {/* Nome do protocolo — destaque disruptivo */}
         <div className="protocol-title-frame mb-10 px-2">
-          <h1 className="protocol-title text-balance font-light leading-[0.95] tracking-[-0.02em] text-4xl md:text-6xl lg:text-7xl">
-            {"PROTOCOLO SOBERANO".split("").map((c, i) => (
-              <span
-                key={`a-${i}`}
-                className="protocol-char"
-                style={{ animationDelay: `${i * 40}ms` }}
-              >
-                {c === " " ? "\u00A0" : c}
-              </span>
-            ))}
+          <h1 className="protocol-title text-balance font-light leading-[0.95] tracking-[-0.01em] text-4xl md:text-6xl lg:text-7xl">
+            PROTOCOLO SOBERANO
             <br />
             <span className="text-mono text-tracked text-base md:text-xl lg:text-2xl text-signal/90">
-              {"DE HARMONIA QUÂNTICA".split("").map((c, i) => (
-                <span
-                  key={`b-${i}`}
-                  className="protocol-char"
-                  style={{ animationDelay: `${800 + i * 35}ms` }}
-                >
-                  {c === " " ? "\u00A0" : c}
-                </span>
-              ))}
+              DE HARMONIA QUÂNTICA
             </span>
           </h1>
         </div>

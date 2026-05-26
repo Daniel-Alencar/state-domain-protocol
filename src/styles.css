@@ -185,14 +185,12 @@
 @keyframes title-glow {
   0%, 100% {
     text-shadow:
-      0 0 14px color-mix(in oklab, var(--signal) 30%, transparent),
-      0 0 48px color-mix(in oklab, var(--signal) 18%, transparent);
+      0 0 10px color-mix(in oklab, var(--signal) 18%, transparent);
   }
   50% {
     text-shadow:
-      0 0 22px color-mix(in oklab, var(--signal) 55%, transparent),
-      0 0 90px color-mix(in oklab, var(--signal) 30%, transparent),
-      0 0 160px color-mix(in oklab, var(--elite) 22%, transparent);
+      0 0 16px color-mix(in oklab, var(--signal) 32%, transparent),
+      0 0 40px color-mix(in oklab, var(--signal) 14%, transparent);
   }
 }
 @keyframes aurora-drift {
