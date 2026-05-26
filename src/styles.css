@@ -177,73 +177,60 @@
   animation: breathe 9s ease-in-out infinite;
 }
 
-/* ===== Hero do nome do Protocolo — brilho disruptivo ===== */
+/* ===== Hero do nome do Protocolo — brilho disruptivo (texto sempre legível) ===== */
 @keyframes shimmer-sweep {
-  0% { background-position: -200% 50%; }
-  100% { background-position: 200% 50%; }
+  0% { background-position: -150% 50%; }
+  100% { background-position: 250% 50%; }
 }
 @keyframes title-glow {
   0%, 100% {
     text-shadow:
-      0 0 18px color-mix(in oklab, var(--signal) 35%, transparent),
-      0 0 60px color-mix(in oklab, var(--signal) 20%, transparent);
+      0 0 14px color-mix(in oklab, var(--signal) 30%, transparent),
+      0 0 48px color-mix(in oklab, var(--signal) 18%, transparent);
   }
   50% {
     text-shadow:
-      0 0 28px color-mix(in oklab, var(--signal) 60%, transparent),
-      0 0 110px color-mix(in oklab, var(--signal) 35%, transparent),
-      0 0 200px color-mix(in oklab, var(--elite) 25%, transparent);
+      0 0 22px color-mix(in oklab, var(--signal) 55%, transparent),
+      0 0 90px color-mix(in oklab, var(--signal) 30%, transparent),
+      0 0 160px color-mix(in oklab, var(--elite) 22%, transparent);
   }
-}
-@keyframes light-sweep {
-  0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
-  20% { opacity: 0.9; }
-  80% { opacity: 0.9; }
-  100% { transform: translateX(120%) skewX(-18deg); opacity: 0; }
 }
 @keyframes aurora-drift {
   0%, 100% { transform: translate3d(0,0,0) scale(1); opacity: 0.55; }
   50% { transform: translate3d(2%, -3%, 0) scale(1.08); opacity: 0.85; }
+}
+@keyframes light-sweep-bg {
+  0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  15% { opacity: 0.55; }
+  85% { opacity: 0.55; }
+  100% { transform: translateX(120%) skewX(-18deg); opacity: 0; }
 }
 @keyframes char-rise {
   0% { transform: translateY(18px); opacity: 0; filter: blur(8px); }
   100% { transform: translateY(0); opacity: 1; filter: blur(0); }
 }
 
-.protocol-title {
-  background: linear-gradient(
-    100deg,
-    oklch(0.96 0 0) 0%,
-    oklch(0.96 0 0) 35%,
-    var(--signal) 50%,
-    oklch(0.96 0 0) 65%,
-    oklch(0.96 0 0) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation:
-    shimmer-sweep 7s linear infinite,
-    title-glow 5s ease-in-out infinite;
-}
-
+/* Wrapper cria contexto de empilhamento próprio para que o brilho fique ATRÁS
+   do texto, sem vazar pelo fundo da página. */
 .protocol-title-frame {
   position: relative;
   isolation: isolate;
+  z-index: 1;
 }
+/* Halo radial — atrás do texto */
 .protocol-title-frame::before {
   content: "";
   position: absolute;
-  inset: -20% -10%;
+  inset: -25% -15%;
   background:
-    radial-gradient(closest-side, color-mix(in oklab, var(--signal) 35%, transparent), transparent 70%),
-    radial-gradient(closest-side at 80% 50%, color-mix(in oklab, var(--elite) 30%, transparent), transparent 70%);
-  filter: blur(40px);
-  z-index: -1;
+    radial-gradient(closest-side, color-mix(in oklab, var(--signal) 28%, transparent), transparent 70%),
+    radial-gradient(closest-side at 80% 50%, color-mix(in oklab, var(--elite) 22%, transparent), transparent 70%);
+  filter: blur(50px);
+  z-index: 0;
   animation: aurora-drift 11s ease-in-out infinite;
   pointer-events: none;
 }
+/* Varredura de luz — atrás do texto, nunca sobre */
 .protocol-title-frame::after {
   content: "";
   position: absolute;
@@ -251,16 +238,51 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    color-mix(in oklab, var(--signal-glow) 80%, transparent) 50%,
+    color-mix(in oklab, var(--signal-glow) 70%, transparent) 50%,
     transparent 100%
   );
+  filter: blur(20px);
+  z-index: 0;
+  pointer-events: none;
+  animation: light-sweep-bg 7s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+/* Texto SEMPRE acima dos brilhos */
+.protocol-title-frame > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* O título mantém cor sólida legível; um shimmer sutil passa por cima
+   sem nunca apagar as letras. */
+.protocol-title {
+  color: var(--foreground);
+  position: relative;
+  animation: title-glow 5s ease-in-out infinite;
+}
+.protocol-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    transparent 40%,
+    color-mix(in oklab, var(--signal) 55%, transparent) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   mix-blend-mode: screen;
   pointer-events: none;
-  animation: light-sweep 6s ease-in-out infinite;
-  animation-delay: 1.5s;
+  animation: shimmer-sweep 6s linear infinite;
 }
 .protocol-char {
   display: inline-block;
   animation: char-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
 
