@@ -16,6 +16,7 @@ import { Route as ManualRouteImport } from './routes/manual'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FrequenciasRouteImport } from './routes/frequencias'
 import { Route as DeterminacoesRouteImport } from './routes/determinacoes'
+import { Route as ComoUtilizarRouteImport } from './routes/como-utilizar'
 import { Route as ArquetiposRouteImport } from './routes/arquetipos'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -55,6 +56,11 @@ const DeterminacoesRoute = DeterminacoesRouteImport.update({
   path: '/determinacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComoUtilizarRoute = ComoUtilizarRouteImport.update({
+  id: '/como-utilizar',
+  path: '/como-utilizar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArquetiposRoute = ArquetiposRouteImport.update({
   id: '/arquetipos',
   path: '/arquetipos',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
+  '/como-utilizar': typeof ComoUtilizarRoute
   '/determinacoes': typeof DeterminacoesRoute
   '/frequencias': typeof FrequenciasRoute
   '/login': typeof LoginRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
+  '/como-utilizar': typeof ComoUtilizarRoute
   '/determinacoes': typeof DeterminacoesRoute
   '/frequencias': typeof FrequenciasRoute
   '/login': typeof LoginRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
+  '/como-utilizar': typeof ComoUtilizarRoute
   '/determinacoes': typeof DeterminacoesRoute
   '/frequencias': typeof FrequenciasRoute
   '/login': typeof LoginRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/arquetipos'
+    | '/como-utilizar'
     | '/determinacoes'
     | '/frequencias'
     | '/login'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/arquetipos'
+    | '/como-utilizar'
     | '/determinacoes'
     | '/frequencias'
     | '/login'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/arquetipos'
+    | '/como-utilizar'
     | '/determinacoes'
     | '/frequencias'
     | '/login'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRoute
   ArquetiposRoute: typeof ArquetiposRoute
+  ComoUtilizarRoute: typeof ComoUtilizarRoute
   DeterminacoesRoute: typeof DeterminacoesRoute
   FrequenciasRoute: typeof FrequenciasRoute
   LoginRoute: typeof LoginRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeterminacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/como-utilizar': {
+      id: '/como-utilizar'
+      path: '/como-utilizar'
+      fullPath: '/como-utilizar'
+      preLoaderRoute: typeof ComoUtilizarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/arquetipos': {
       id: '/arquetipos'
       path: '/arquetipos'
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRoute,
   ArquetiposRoute: ArquetiposRoute,
+  ComoUtilizarRoute: ComoUtilizarRoute,
   DeterminacoesRoute: DeterminacoesRoute,
   FrequenciasRoute: FrequenciasRoute,
   LoginRoute: LoginRoute,
@@ -250,3 +271,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
