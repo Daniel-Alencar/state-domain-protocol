@@ -20,6 +20,7 @@ import {
 } from "@/lib/active-state";
 import { start, isRunning, stopAll, setMasterVolume, getMasterVolume } from "@/lib/binaural-engine";
 import { analyzeDetermination } from "@/lib/determinations.functions";
+import { enableWakeLock, disableWakeLock } from "@/lib/wake-lock";
 import { useServerFn } from "@tanstack/react-start";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
@@ -28,33 +29,6 @@ export const Route = createFileRoute("/determinacoes")({
   head: () => ({ meta: [{ title: "Determinações · Protocolo Soberano" }] }),
   component: Determinacoes,
 });
-
-type SpeechRecognitionLike = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onerror: ((e: unknown) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-};
-
-function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
-  if (typeof window === "undefined") return null;
-  // Safari/iOS expõe webkitSpeechRecognition mas NÃO transcreve em página web
-  // e ainda emite um "click/ding" audível que vaza na gravação. Pulamos lá.
-  const ua = navigator.userAgent;
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && (navigator as unknown as { maxTouchPoints?: number }).maxTouchPoints! > 1);
-  const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
-  if (isIOS || isSafari) return null;
-  const w = window as unknown as {
-    SpeechRecognition?: new () => SpeechRecognitionLike;
-    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
-  };
-  return w.SpeechRecognition || w.webkitSpeechRecognition || null;
-}
-
 
 import { getAudioBlob } from "@/lib/determinations-audio";
 
@@ -72,8 +46,9 @@ function Determinacoes() {
   const [analyzing, setAnalyzing] = useState(false);
 
   const mediaRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const recogRef = useRef<SpeechRecognitionLike | null>(null);
+  const manualStopRef = useRef(false);
 
   async function startRec() {
     try {
@@ -84,63 +59,60 @@ function Determinacoes() {
       setPendingBlob(null);
       setAnalyzing(false);
       mediaRef.current = null;
-      recogRef.current = null;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      manualStopRef.current = false;
       chunksRef.current = [];
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       const mr = new MediaRecorder(stream);
       mr.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
       mr.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        mediaRef.current = null;
+        disableWakeLock();
         setPendingBlob(new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" }));
-      };
-      mr.start();
-      mediaRef.current = mr;
-
-      const Recog = getSpeechRecognition();
-      if (Recog) {
-        const r = new Recog();
-        r.lang = "pt-BR";
-        r.continuous = true;
-        r.interimResults = true;
-        r.onresult = (e) => {
-          let text = "";
-          for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript + " ";
-          setTranscript(text.trim());
-        };
-        r.onerror = () => { /* ignore */ };
-        r.onend = () => {
-          // SpeechRecognition do Chrome encerra sozinho após ~60s de silêncio.
-          // Reinicia enquanto a gravação ainda estiver ativa para não perder transcrição.
-          if (mediaRef.current && mediaRef.current.state === "recording") {
-            try { r.start(); } catch { /* já reiniciou */ }
-          }
-        };
-        try {
-          r.start();
-          recogRef.current = r;
-        } catch {
-          /* noop */
+        setRecording(false);
+        if (!manualStopRef.current) {
+          toast.error(
+            "A gravação foi interrompida pelo navegador. Mantenha esta tela aberta e tente novamente.",
+          );
         }
-
-      }
+      };
+      mr.onerror = () => {
+        toast.error("O gravador encontrou um erro. Tente novamente mantendo esta tela aberta.");
+      };
+      mr.start(1000);
+      mediaRef.current = mr;
+      enableWakeLock();
       setRecording(true);
     } catch (err) {
       console.error(err);
+      disableWakeLock();
       toast.error("Não foi possível acessar o microfone.");
     }
   }
 
   function stopRec() {
-    try { mediaRef.current?.stop(); } catch { /* noop */ }
-    mediaRef.current = null;
-    if (recogRef.current) {
-      try { recogRef.current.stop(); } catch { /* noop */ }
-      recogRef.current = null;
+    manualStopRef.current = true;
+    const recorder = mediaRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      try {
+        recorder.stop();
+      } catch {
+        /* noop */
+      }
+    } else {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      mediaRef.current = null;
+      disableWakeLock();
+      setRecording(false);
     }
-    setRecording(false);
   }
 
   /** Analisa com IA E salva — sem limite de gravações. */
@@ -199,8 +171,6 @@ function Determinacoes() {
       setAnalyzing(false);
     }
   }
-
-
 
   function play(d: Determination, presetOverride?: string[]) {
     // usa o estado atual do card (presetOverride) — garante que o que está
@@ -340,10 +310,10 @@ function Determinacoes() {
           {recording && (
             <div className="mb-4 flex items-center gap-2 text-[11px] text-signal">
               <span className="h-2 w-2 animate-pulse rounded-full bg-signal" />
-              Gravando… fale sua determinação em primeira pessoa. Sem limite de tempo — vai até você clicar em <strong className="ml-1">Parar</strong>.
+              Gravando… fale sua determinação em primeira pessoa. Sem limite de tempo — vai até você
+              clicar em <strong className="ml-1">Parar</strong>.
             </div>
           )}
-
 
           <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
             <div>
@@ -359,13 +329,13 @@ function Determinacoes() {
             </div>
             <div>
               <label className="text-mono text-tracked text-[9px] text-muted-foreground">
-                Transcrição (auto no Chrome · digite no Safari/iOS/Firefox)
+                Texto da determinação (digite ou cole após gravar)
               </label>
               <textarea
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
                 rows={3}
-                placeholder="A IA precisa do TEXTO da sua determinação para sugerir arquétipos. Se o navegador não transcrever automaticamente (Safari/iOS/Firefox), cole ou digite aqui o que você falou."
+                placeholder="Para manter a gravação limpa e sem ding, a transcrição automática foi desligada. Depois de gravar, digite ou cole aqui o que você falou para a IA sugerir arquétipos."
                 className="mt-1 w-full rounded-md border border-border/60 bg-background/40 px-3 py-2 text-sm text-foreground focus:border-signal/60 focus:outline-none"
               />
             </div>
@@ -518,7 +488,9 @@ function DeterminationCard({
     } else {
       setAudioSrc(d.audioDataUrl);
     }
-    return () => { if (url) URL.revokeObjectURL(url); };
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
   }, [d.id, d.hasAudio, d.audioDataUrl]);
 
   function saveTitle() {
