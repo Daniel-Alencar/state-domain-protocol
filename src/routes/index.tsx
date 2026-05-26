@@ -120,6 +120,7 @@ function Landing() {
             A ciência do Protocolo
           </Link>
         </div>
+      </section>
 
       {/* Pillars */}
       <section className="relative z-10 border-t border-border/60">
