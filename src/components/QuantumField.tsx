@@ -21,13 +21,14 @@ type Profile = {
 };
 
 const PROFILES: Record<string, Profile> = {
-  default:  { density: 0.05,  speed: 0.18, pull: 0.040, jitter: 0.012, linkDist: 130, hue: 220, curve: 0.0,  lineAlpha: 0.10 },
+  default:  { density: 0.085, speed: 0.32, pull: 0.050, jitter: 0.018, linkDist: 170, hue: 220, curve: 0.18, lineAlpha: 0.22 },
   rocha:    { density: 0.038, speed: 0.08, pull: 0.020, jitter: 0.006, linkDist: 90,  hue: 200, curve: 0.0,  lineAlpha: 0.14 },
   aguia:    { density: 0.055, speed: 0.32, pull: 0.060, jitter: 0.014, linkDist: 170, hue: 210, curve: 0.05, lineAlpha: 0.10 },
   serpente: { density: 0.060, speed: 0.22, pull: 0.045, jitter: 0.018, linkDist: 150, hue: 170, curve: 0.85, lineAlpha: 0.08 },
   tubarao:  { density: 0.045, speed: 0.40, pull: 0.075, jitter: 0.010, linkDist: 110, hue: 195, curve: 0.0,  lineAlpha: 0.16 },
   pantera:  { density: 0.040, speed: 0.10, pull: 0.030, jitter: 0.008, linkDist: 120, hue: 280, curve: 0.20, lineAlpha: 0.06 },
 };
+
 
 function pickProfile(variant?: string | null): Profile {
   if (!variant) return PROFILES.default;
