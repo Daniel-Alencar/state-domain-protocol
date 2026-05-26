@@ -289,14 +289,19 @@ function Determinacoes() {
               <div className="text-lg font-light text-foreground">Gravar voz</div>
             </div>
             <div className="flex items-center gap-2">
-              {!recording ? (
+            {!recording ? (
+              <div className="flex flex-col items-end gap-1">
                 <button
                   onClick={startRec}
                   className="text-mono text-tracked rounded-full bg-foreground px-5 py-2 text-[11px] text-background"
                 >
                   ● Iniciar gravação
                 </button>
-              ) : (
+                <span className="text-mono text-tracked text-[9px] text-signal">
+                  Não saia da tela durante a gravação
+                </span>
+              </div>
+            ) : (
                 <button
                   onClick={stopRec}
                   className="text-mono text-tracked rounded-full bg-destructive px-5 py-2 text-[11px] text-destructive-foreground"
