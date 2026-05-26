@@ -80,10 +80,11 @@ export function QuantumField({ variant, intensity = 1, interactive = true, showG
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * p.speed,
         vy: (Math.random() - 0.5) * p.speed,
-        r: 0.4 + Math.random() * 1.2,
+        r: 0.8 + Math.random() * 1.8,
         phase: Math.random() * Math.PI * 2,
       }));
     };
+
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
     const lerpProfile = (t: number) => {
