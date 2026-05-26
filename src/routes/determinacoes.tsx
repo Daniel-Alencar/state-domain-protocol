@@ -42,12 +42,19 @@ type SpeechRecognitionLike = {
 
 function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
   if (typeof window === "undefined") return null;
+  // Safari/iOS expõe webkitSpeechRecognition mas NÃO transcreve em página web
+  // e ainda emite um "click/ding" audível que vaza na gravação. Pulamos lá.
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && (navigator as unknown as { maxTouchPoints?: number }).maxTouchPoints! > 1);
+  const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+  if (isIOS || isSafari) return null;
   const w = window as unknown as {
     SpeechRecognition?: new () => SpeechRecognitionLike;
     webkitSpeechRecognition?: new () => SpeechRecognitionLike;
   };
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
+
 
 import { getAudioBlob } from "@/lib/determinations-audio";
 
