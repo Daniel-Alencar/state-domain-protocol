@@ -50,7 +50,7 @@ function ACienciaDoProtocolo() {
             <p className="mb-4 text-base leading-relaxed text-foreground/90 md:text-lg">
               O <strong>Protocolo Soberano de Harmonia Frequencial Quântica</strong> é um método científico e prático de reprogramação mental e biológica que utiliza a <strong>engenharia neuroacústica</strong>. Ele consiste na sobreposição de determinações e decretos de comando gravados em áudio sobre frequências sonoras puras, especificamente <strong>batidas binaurais</strong>.
             </p>
-            <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className="text-sm leading-relaxed text-foreground/90 md:text-base">
               A mecânica baseia-se na <strong>sincronização bihemisférica</strong>: ao enviar frequências ligeiramente diferentes para cada ouvido, o cérebro é forçado a criar uma terceira frequência interna (a batida binaural). Esse processo altera o estado de onda cerebral (reduzindo o ruído do consciente/ego) e abre as portas do subconsciente para gravar novas diretrizes de comportamento, saúde e prosperidade, sem a interferência de dúvidas ou crenças limitantes.
             </p>
           </div>
