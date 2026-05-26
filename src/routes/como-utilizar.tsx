@@ -77,7 +77,7 @@ function Step({ number, title, desc }: { number: string; title: string; desc: st
         <div className="text-mono text-tracked text-[10px] text-signal">{number}</div>
         <div>
           <h3 className="mb-2 text-lg font-medium">{title}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+          <p className="text-sm md:text-base text-foreground/90 leading-relaxed">{desc}</p>
         </div>
       </div>
     </div>

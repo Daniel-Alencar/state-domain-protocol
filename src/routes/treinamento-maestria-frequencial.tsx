@@ -37,7 +37,7 @@ function TreinamentoMaestriaFrequencial() {
         <h1 className="protocol-title mb-4 text-3xl font-light leading-tight md:text-5xl">
           Treinamento em Maestria Frequencial
         </h1>
-        <p className="mx-auto max-w-2xl text-sm text-muted-foreground md:text-base">
+        <p className="mx-auto max-w-2xl text-sm md:text-base text-foreground/90">
           Habilitação de Sinal: Por que a Maestria é Obrigatória?
         </p>
       </section>
@@ -50,10 +50,10 @@ function TreinamentoMaestriaFrequencial() {
             <p className="mb-4 text-base leading-relaxed text-foreground/90 md:text-lg">
               O aplicativo <strong>Protocolo Soberano de Harmonia Quântica</strong> é um acelerador de partículas mental. Ele entrega a você as frequências puras e o isolamento acústico necessário para o colapso de realidade. No entanto, o hardware biológico necessita da calibração correta para processar essa potência sem gerar saturação ou rebote neurológico.
             </p>
-            <p className="mb-4 text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className="mb-4 text-sm md:text-base leading-relaxed text-foreground/90">
               Ouvir as frequências sem o método de ancoragem correto é como ligar uma máquina industrial de alta voltagem em uma rede elétrica residencial: o sistema entra em sobrecarga.
             </p>
-            <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className="text-sm md:text-base leading-relaxed text-foreground/90">
               Para que a sua voz e as assinaturas sonoras dos arquétipos operem em sinergia perfeita, o treinamento <strong>Harmonia Frequencial Quântica para Transformação de Realidades</strong> é o seu manual de instruções definitivo.
             </p>
           </div>
@@ -69,7 +69,7 @@ function TreinamentoMaestriaFrequencial() {
               <span className="text-mono text-tracked text-[10px] text-signal">01</span>
               <h3 className="text-xl font-medium">A Engenharia dos Decretos</h3>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className="text-sm md:text-base leading-relaxed text-foreground/90">
               Como redigir determinações matematicamente exatas, utilizando os códigos de comando que o subconsciente aceita de forma imediata, sem passar pelo filtro de dúvida do ego.
             </p>
           </div>
@@ -80,7 +80,7 @@ function TreinamentoMaestriaFrequencial() {
               <span className="text-mono text-tracked text-[10px] text-signal">02</span>
               <h3 className="text-xl font-medium">Ciclos de Sintonização Limpa</h3>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className="text-sm md:text-base leading-relaxed text-foreground/90">
               O cronograma exato de dias e janelas biológicas para rodar cada combo de arquétipos, impedindo o conflito de sinal (como misturar frequências de alerta com frequências de cura).
             </p>
           </div>
@@ -91,7 +91,7 @@ function TreinamentoMaestriaFrequencial() {
               <span className="text-mono text-tracked text-[10px] text-signal">03</span>
               <h3 className="text-xl font-medium">Ancoragem Biofísica</h3>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className="text-sm md:text-base leading-relaxed text-foreground/90">
               Exercícios corporais e de respiração ancestral para fixar a frequência na matéria, transformando o estímulo sonoro em ação imediata e atração magnética de contratos e saúde.
             </p>
           </div>
