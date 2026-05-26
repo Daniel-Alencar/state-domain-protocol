@@ -104,13 +104,20 @@ function Determinacoes() {
           setTranscript(text.trim());
         };
         r.onerror = () => { /* ignore */ };
-        r.onend = () => { /* ignore */ };
+        r.onend = () => {
+          // SpeechRecognition do Chrome encerra sozinho após ~60s de silêncio.
+          // Reinicia enquanto a gravação ainda estiver ativa para não perder transcrição.
+          if (mediaRef.current && mediaRef.current.state === "recording") {
+            try { r.start(); } catch { /* já reiniciou */ }
+          }
+        };
         try {
           r.start();
           recogRef.current = r;
         } catch {
           /* noop */
         }
+
       }
       setRecording(true);
     } catch (err) {
