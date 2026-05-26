@@ -310,8 +310,8 @@ function Determinacoes() {
           {recording && (
             <div className="mb-4 flex items-center gap-2 text-[11px] text-signal">
               <span className="h-2 w-2 animate-pulse rounded-full bg-signal" />
-              Gravando… fale sua determinação em primeira pessoa. Sem limite de tempo — vai até
-              você clicar em <strong className="ml-1">Parar</strong>.
+              Gravando… fale sua determinação em primeira pessoa. Sem limite de tempo — vai até você
+              clicar em <strong className="ml-1">Parar</strong>.
             </div>
           )}
 
