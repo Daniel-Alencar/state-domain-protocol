@@ -488,7 +488,9 @@ function DeterminationCard({
     } else {
       setAudioSrc(d.audioDataUrl);
     }
-    return () => { if (url) URL.revokeObjectURL(url); };
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
   }, [d.id, d.hasAudio, d.audioDataUrl]);
 
   function saveTitle() {
