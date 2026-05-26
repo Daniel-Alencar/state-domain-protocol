@@ -37,7 +37,7 @@ function ACienciaDoProtocolo() {
         <h1 className="protocol-title mb-4 text-3xl font-light leading-tight md:text-5xl">
           A Ciência do Protocolo
         </h1>
-        <p className="mx-auto max-w-2xl text-sm text-muted-foreground md:text-base">
+        <p className="mx-auto max-w-2xl text-sm text-foreground/90 md:text-base">
           O que é o Protocolo Soberano de Harmonia Quântica?
         </p>
       </section>
