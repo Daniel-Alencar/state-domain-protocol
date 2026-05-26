@@ -663,7 +663,7 @@ function DeterminationCard({
               ? "Adicionar / trocar arquétipos…"
               : "Trocar arquétipos…"}
           </summary>
-          <div className="mt-2 max-h-44 overflow-y-auto pr-1">
+          <div className="mt-2 max-h-[28rem] overflow-y-auto pr-1">
             {(["Delta", "Theta", "Alpha", "Beta", "Gamma"] as const).map((band) => {
               const group = ARCHETYPES.filter((a) => a.band === band);
               if (group.length === 0) return null;
