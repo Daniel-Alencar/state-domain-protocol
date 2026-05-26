@@ -83,14 +83,15 @@ function Landing() {
           </h1>
         </div>
 
-        <p className="mb-3 text-xl font-light text-foreground/90 md:text-2xl">
-          Clareza. Direção. <span className="text-signal">Domínio.</span>
-        </p>
+        <div className="clarity-statement mb-3 text-xl font-light md:text-2xl">
+          <span className="clarity-word">Clareza.</span>{" "}
+          <span className="clarity-word">Direção.</span>{" "}
+          <span className="clarity-word text-signal">Domínio.</span>
+        </div>
         <p className="mb-12 max-w-xl text-sm text-muted-foreground md:text-base">
           Uma infraestrutura de foco, posicionamento e presença para quem opera
           em ambientes de decisão.
         </p>
-
 
         <div className="flex flex-col items-center gap-3 sm:flex-row">
           <Link
@@ -105,6 +106,12 @@ function Landing() {
             className="text-mono text-tracked rounded-full border border-border px-6 py-3 text-[10px] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
           >
             Ver arquétipos
+          </Link>
+          <Link
+            to="/como-utilizar"
+            className="text-mono text-tracked rounded-full border border-signal/40 px-6 py-3 text-[10px] text-signal/90 transition-all hover:border-signal hover:text-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
+          >
+            Como Utilizar
           </Link>
         </div>
       </section>
