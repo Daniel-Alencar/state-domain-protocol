@@ -221,9 +221,9 @@
   position: absolute;
   inset: -25% -15%;
   background:
-    radial-gradient(closest-side, color-mix(in oklab, var(--signal) 28%, transparent), transparent 70%),
-    radial-gradient(closest-side at 80% 50%, color-mix(in oklab, var(--elite) 22%, transparent), transparent 70%);
-  filter: blur(50px);
+    radial-gradient(closest-side, color-mix(in oklab, var(--signal) 42%, transparent), transparent 70%),
+    radial-gradient(closest-side at 80% 50%, color-mix(in oklab, var(--elite) 32%, transparent), transparent 70%);
+  filter: blur(60px);
   z-index: 0;
   animation: aurora-drift 11s ease-in-out infinite;
   pointer-events: none;
