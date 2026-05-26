@@ -104,13 +104,20 @@ function Determinacoes() {
           setTranscript(text.trim());
         };
         r.onerror = () => { /* ignore */ };
-        r.onend = () => { /* ignore */ };
+        r.onend = () => {
+          // SpeechRecognition do Chrome encerra sozinho após ~60s de silêncio.
+          // Reinicia enquanto a gravação ainda estiver ativa para não perder transcrição.
+          if (mediaRef.current && mediaRef.current.state === "recording") {
+            try { r.start(); } catch { /* já reiniciou */ }
+          }
+        };
         try {
           r.start();
           recogRef.current = r;
         } catch {
           /* noop */
         }
+
       }
       setRecording(true);
     } catch (err) {
@@ -326,9 +333,10 @@ function Determinacoes() {
           {recording && (
             <div className="mb-4 flex items-center gap-2 text-[11px] text-signal">
               <span className="h-2 w-2 animate-pulse rounded-full bg-signal" />
-              Gravando… fale sua determinação em primeira pessoa.
+              Gravando… fale sua determinação em primeira pessoa. Sem limite de tempo — vai até você clicar em <strong className="ml-1">Parar</strong>.
             </div>
           )}
+
 
           <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
             <div>
@@ -656,7 +664,7 @@ function DeterminationCard({
               ? "Adicionar / trocar arquétipos…"
               : "Trocar arquétipos…"}
           </summary>
-          <div className="mt-2 max-h-44 overflow-y-auto pr-1">
+          <div className="mt-2 max-h-[28rem] overflow-y-auto pr-1">
             {(["Delta", "Theta", "Alpha", "Beta", "Gamma"] as const).map((band) => {
               const group = ARCHETYPES.filter((a) => a.band === band);
               if (group.length === 0) return null;
