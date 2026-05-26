@@ -236,13 +236,13 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    color-mix(in oklab, var(--signal-glow) 70%, transparent) 50%,
+    color-mix(in oklab, var(--signal-glow) 100%, transparent) 50%,
     transparent 100%
   );
-  filter: blur(20px);
+  filter: blur(28px);
   z-index: 0;
   pointer-events: none;
-  animation: light-sweep-bg 7s ease-in-out infinite;
+  animation: light-sweep-bg 5.5s ease-in-out infinite;
   animation-delay: 1.5s;
 }
 /* Texto SEMPRE acima dos brilhos */
