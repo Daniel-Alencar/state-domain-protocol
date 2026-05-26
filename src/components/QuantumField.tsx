@@ -234,14 +234,26 @@ export function QuantumField({ variant, intensity = 1, interactive = true, showG
         }
       }
 
-      // Particles
+      // Particles (com glow para parecerem constelações nítidas)
+      ctx.save();
       for (const a of particles) {
-        const tw = 0.7 + 0.3 * Math.sin(time * 1.2 + a.phase);
-        ctx.fillStyle = `hsla(${p.hue}, 70%, 75%, ${0.55 * tw})`;
+        const tw = 0.6 + 0.4 * Math.sin(time * 1.6 + a.phase);
+        // halo
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `hsla(${p.hue}, 90%, 75%, ${0.9 * tw})`;
+        ctx.fillStyle = `hsla(${p.hue}, 85%, 88%, ${0.85 * tw})`;
         ctx.beginPath();
         ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
         ctx.fill();
+        // núcleo branco para nitidez
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = `hsla(0, 0%, 100%, ${0.9 * tw})`;
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, a.r * 0.45, 0, Math.PI * 2);
+        ctx.fill();
       }
+      ctx.restore();
+
 
       // Pulse ring overlay
       if (pulse.strength > 0.01) {
