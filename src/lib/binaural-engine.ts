@@ -29,7 +29,11 @@ type SessionStatus = {
 
 let ctx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
-let masterVolume = 0.35; // 30–40% recomendado quando há voz por cima
+// Volume "percebido" salvo (0..1, o que o slider mostra).
+let masterVolume = 0.35;
+// Escala aplicada ao GainNode para que o slider em 100% não estoure o ouvido
+// quando combinado com voz por cima. 100% slider → 0.4 de ganho real.
+const MASTER_SCALE = 0.4;
 const sessions = new Map<string, Session>();
 
 type Listener = (active: SessionStatus[]) => void;
@@ -49,7 +53,7 @@ function ensureCtx(): AudioContext {
       (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     ctx = new AC();
     masterGain = ctx.createGain();
-    masterGain.gain.value = masterVolume;
+    masterGain.gain.value = masterVolume * MASTER_SCALE;
     masterGain.connect(ctx.destination);
   }
   if (ctx.state === "suspended") void ctx.resume();
@@ -62,7 +66,7 @@ export function setMasterVolume(v: number) {
     window.localStorage.setItem(VOLUME_KEY, String(masterVolume));
   }
   if (masterGain && ctx) {
-    masterGain.gain.setTargetAtTime(masterVolume, ctx.currentTime, 0.05);
+    masterGain.gain.setTargetAtTime(masterVolume * MASTER_SCALE, ctx.currentTime, 0.05);
   }
 }
 
