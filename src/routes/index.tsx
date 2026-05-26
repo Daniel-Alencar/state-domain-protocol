@@ -119,6 +119,12 @@ function Landing() {
           >
             A ciência do Protocolo
           </Link>
+          <Link
+            to="/treinamento-maestria-frequencial"
+            className="text-mono text-tracked rounded-full border border-signal/40 px-6 py-3 text-[10px] text-signal/90 transition-all hover:border-signal hover:text-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
+          >
+            Treinamento em Maestria Frequencial
+          </Link>
         </div>
       </section>
 
