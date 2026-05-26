@@ -117,11 +117,25 @@ if (typeof window !== "undefined") {
 }
 const volListeners = new Set<(v: number) => void>();
 
+// Boost máximo aplicado quando o slider está em 100%. Voz gravada por mic
+// chega com nível baixo (~ -20 dBFS); permitimos ganho > 1 via WebAudio para
+// equiparar à percepção das frequências binaurais.
+const DET_MAX_GAIN = 4;
+
+function gainFromVolume(v: number) {
+  return Math.max(0, Math.min(1, v)) * DET_MAX_GAIN;
+}
+
 export function getDeterminationVolume() { return determinationVolume; }
 export function setDeterminationVolume(v: number) {
   determinationVolume = Math.max(0, Math.min(1, v));
   if (typeof window !== "undefined") window.localStorage.setItem(VOL_KEY, String(determinationVolume));
-  if (audioEl) audioEl.volume = determinationVolume;
+  if (gainNode && audioCtx) {
+    gainNode.gain.setTargetAtTime(gainFromVolume(determinationVolume), audioCtx.currentTime, 0.05);
+  } else if (audioEl) {
+    // Fallback (sem WebAudio): cap em 1.
+    audioEl.volume = Math.min(1, gainFromVolume(determinationVolume));
+  }
   volListeners.forEach((l) => l(determinationVolume));
 }
 export function useDeterminationVolume() {
@@ -134,6 +148,9 @@ export function useDeterminationVolume() {
 const activeListeners = new Set<(id: string | null) => void>();
 let audioEl: HTMLAudioElement | null = null;
 let currentObjectUrl: string | null = null;
+let audioCtx: AudioContext | null = null;
+let gainNode: GainNode | null = null;
+let sourceNode: MediaElementAudioSourceNode | null = null;
 
 export function getActiveDeterminationId(): string | null {
   if (typeof window === "undefined") return null;
@@ -142,7 +159,29 @@ export function getActiveDeterminationId(): string | null {
 
 function teardownAudio() {
   if (audioEl) { try { audioEl.pause(); } catch { /* noop */ } audioEl = null; }
+  if (sourceNode) { try { sourceNode.disconnect(); } catch { /* noop */ } sourceNode = null; }
+  if (gainNode) { try { gainNode.disconnect(); } catch { /* noop */ } gainNode = null; }
   if (currentObjectUrl) { try { URL.revokeObjectURL(currentObjectUrl); } catch { /* noop */ } currentObjectUrl = null; }
+}
+
+function attachWebAudio(el: HTMLAudioElement) {
+  try {
+    if (!audioCtx) {
+      const AC: typeof AudioContext =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioCtx = new AC();
+    }
+    if (audioCtx.state === "suspended") void audioCtx.resume();
+    sourceNode = audioCtx.createMediaElementSource(el);
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = gainFromVolume(determinationVolume);
+    sourceNode.connect(gainNode).connect(audioCtx.destination);
+    el.volume = 1; // o ganho é feito no GainNode
+  } catch {
+    // Se WebAudio falhar, cai para o volume nativo (cap em 1).
+    el.volume = Math.min(1, gainFromVolume(determinationVolume));
+  }
 }
 
 export function setActiveDetermination(id: string | null) {
@@ -164,7 +203,8 @@ export function setActiveDetermination(id: string | null) {
             currentObjectUrl = URL.createObjectURL(blob);
             audioEl = new Audio(currentObjectUrl);
             audioEl.loop = true;
-            audioEl.volume = determinationVolume;
+            audioEl.crossOrigin = "anonymous";
+            attachWebAudio(audioEl);
             await audioEl.play().catch(() => { /* iOS exige gesto */ });
             enableWakeLock();
           } catch (e) {
@@ -175,7 +215,7 @@ export function setActiveDetermination(id: string | null) {
         // Legado.
         audioEl = new Audio(item.audioDataUrl);
         audioEl.loop = true;
-        audioEl.volume = determinationVolume;
+        attachWebAudio(audioEl);
         void audioEl.play().catch(() => { /* iOS exige gesto */ });
         enableWakeLock();
       }
