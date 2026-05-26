@@ -138,7 +138,7 @@ function ACienciaDoProtocolo() {
                 <p className="mb-2 text-sm font-medium text-foreground">
                   Alta performance e fechamento de contratos de elite
                 </p>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-foreground/90">
                   O protocolo aciona frequências em ondas <strong>Beta</strong> vinculadas ao Tubarão e ao Estrategista, injetando prontidão e sangue-frio no sistema.
                 </p>
               </div>
@@ -146,7 +146,7 @@ function ACienciaDoProtocolo() {
                 <p className="mb-2 text-sm font-medium text-foreground">
                   Purificação biológica e eliminação de anomalias
                 </p>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-foreground/90">
                   O protocolo aciona frequências em ondas <strong>Theta/Delta</strong> vinculadas ao Mago Transmutação e à Fênix, ativando a varredura celular e a autorregeneração enquanto o corpo descansa.
                 </p>
               </div>
@@ -184,7 +184,7 @@ function ACienciaDoProtocolo() {
               ].map((item) => (
                 <div key={item.title} className="rounded-xl border border-border/40 bg-background/40 p-4">
                   <h4 className="mb-2 text-sm font-medium text-signal">{item.title}</h4>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+                  <p className="text-sm leading-relaxed text-foreground/90">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -203,19 +203,19 @@ function ACienciaDoProtocolo() {
             <div className="space-y-4">
               <div className="rounded-xl border border-border/40 bg-background/40 p-4 md:p-6">
                 <h4 className="mb-2 text-sm font-medium text-signal">No Campo Profissional e Financeiro</h4>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-foreground/90">
                   Velocidade de decisão cirúrgica, comunicação magnética e autoridade instantânea em reuniões e palestras. O mercado deixa de ser um ambiente de disputa e passa a se curvar à sua jurisdição comercial.
                 </p>
               </div>
               <div className="rounded-xl border border-border/40 bg-background/40 p-4 md:p-6">
                 <h4 className="mb-2 text-sm font-medium text-signal">No Campo Biológico</h4>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-foreground/90">
                   Restauração da saúde vital. O corpo passa a rejeitar o declínio, otimizando a circulação, a acuidade sensorial (visão, audição e fala) e a regeneração tecidual profunda.
                 </p>
               </div>
               <div className="rounded-xl border border-border/40 bg-background/40 p-4 md:p-6">
                 <h4 className="mb-2 text-sm font-medium text-signal">No Campo Pessoal e Familiar</h4>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-foreground/90">
                   Eliminação do orgulho estéril e dos ruídos de comunicação, permitindo liderar o ecossistema familiar e de parcerias estratégicas com sabedoria, justiça e foco de longo prazo.
                 </p>
               </div>
@@ -237,7 +237,7 @@ function ACienciaDoProtocolo() {
             <p className="mb-4 text-sm leading-relaxed text-foreground/90 md:text-base">
               Para extrair o rendimento máximo e o correto alinhamento das forças envolvidas neste método, o uso das frequências e decretos deve ser rigorosamente orientado. A manipulação incorreta de assinaturas sonoras e arquétipos pode gerar ruído e saturação no sistema cognitivo. <strong>Não deve ser executado sem fones de ouvido.</strong>
             </p>
-            <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className="text-sm leading-relaxed text-foreground/90 md:text-base">
               Para a segurança mental e para que a transformação de sua realidade realmente ocorra sem barreiras, é altamente recomendável a realização prévia do curso <em>"Harmonia Frequencial Quântica para Transformação de Realidades"</em>, onde toda a base técnica e o manual de instruções prático são fornecidos em sua totalidade.
             </p>
           </div>
