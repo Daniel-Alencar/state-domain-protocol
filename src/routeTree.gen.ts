@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TreinamentoMaestriaFrequencialRouteImport } from './routes/treinamento-maestria-frequencial'
 import { Route as RelatosRouteImport } from './routes/relatos'
 import { Route as PerformanceRouteImport } from './routes/performance'
 import { Route as NetworkingRouteImport } from './routes/networking'
@@ -22,6 +23,12 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as ACienciaDoProtocoloRouteImport } from './routes/a-ciencia-do-protocolo'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TreinamentoMaestriaFrequencialRoute =
+  TreinamentoMaestriaFrequencialRouteImport.update({
+    id: '/treinamento-maestria-frequencial',
+    path: '/treinamento-maestria-frequencial',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RelatosRoute = RelatosRouteImport.update({
   id: '/relatos',
   path: '/relatos',
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
   '/relatos': typeof RelatosRoute
+  '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +118,7 @@ export interface FileRoutesByTo {
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
   '/relatos': typeof RelatosRoute
+  '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +134,7 @@ export interface FileRoutesById {
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
   '/relatos': typeof RelatosRoute
+  '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/networking'
     | '/performance'
     | '/relatos'
+    | '/treinamento-maestria-frequencial'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/networking'
     | '/performance'
     | '/relatos'
+    | '/treinamento-maestria-frequencial'
   id:
     | '__root__'
     | '/'
@@ -169,6 +181,7 @@ export interface FileRouteTypes {
     | '/networking'
     | '/performance'
     | '/relatos'
+    | '/treinamento-maestria-frequencial'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,10 +197,18 @@ export interface RootRouteChildren {
   NetworkingRoute: typeof NetworkingRoute
   PerformanceRoute: typeof PerformanceRoute
   RelatosRoute: typeof RelatosRoute
+  TreinamentoMaestriaFrequencialRoute: typeof TreinamentoMaestriaFrequencialRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/treinamento-maestria-frequencial': {
+      id: '/treinamento-maestria-frequencial'
+      path: '/treinamento-maestria-frequencial'
+      fullPath: '/treinamento-maestria-frequencial'
+      preLoaderRoute: typeof TreinamentoMaestriaFrequencialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/relatos': {
       id: '/relatos'
       path: '/relatos'
@@ -288,6 +309,7 @@ const rootRouteChildren: RootRouteChildren = {
   NetworkingRoute: NetworkingRoute,
   PerformanceRoute: PerformanceRoute,
   RelatosRoute: RelatosRoute,
+  TreinamentoMaestriaFrequencialRoute: TreinamentoMaestriaFrequencialRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
