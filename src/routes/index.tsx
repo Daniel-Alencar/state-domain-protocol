@@ -113,7 +113,12 @@ function Landing() {
           >
             Como Utilizar
           </Link>
-        </div>
+          <Link
+            to="/a-ciencia-do-protocolo"
+            className="text-mono text-tracked rounded-full border border-border px-6 py-3 text-[10px] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+          >
+            A ciência do Protocolo
+          </Link>
       </section>
 
       {/* Pillars */}
