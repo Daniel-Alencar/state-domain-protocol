@@ -54,13 +54,42 @@ function Landing() {
         <p className="text-mono text-tracked mb-4 text-[10px] text-muted-foreground">
           Central operacional · Alta performance
         </p>
-        <h1 className="mb-6 text-5xl font-light tracking-tight text-foreground md:text-7xl">
+
+        {/* Nome do protocolo — destaque disruptivo */}
+        <div className="protocol-title-frame mb-6 px-2">
+          <h1 className="protocol-title text-balance font-light leading-[0.95] tracking-[-0.02em] text-4xl md:text-6xl lg:text-7xl">
+            {"PROTOCOLO SOBERANO".split("").map((c, i) => (
+              <span
+                key={`a-${i}`}
+                className="protocol-char"
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                {c === " " ? "\u00A0" : c}
+              </span>
+            ))}
+            <br />
+            <span className="text-mono text-tracked text-base md:text-xl lg:text-2xl text-signal/90">
+              {"DE HARMONIA QUÂNTICA".split("").map((c, i) => (
+                <span
+                  key={`b-${i}`}
+                  className="protocol-char"
+                  style={{ animationDelay: `${800 + i * 35}ms` }}
+                >
+                  {c === " " ? "\u00A0" : c}
+                </span>
+              ))}
+            </span>
+          </h1>
+        </div>
+
+        <p className="mb-3 text-xl font-light text-foreground/90 md:text-2xl">
           Clareza. Direção. <span className="text-signal">Domínio.</span>
-        </h1>
-        <p className="mb-12 max-w-xl text-base text-muted-foreground md:text-lg">
+        </p>
+        <p className="mb-12 max-w-xl text-sm text-muted-foreground md:text-base">
           Uma infraestrutura de foco, posicionamento e presença para quem opera
           em ambientes de decisão.
         </p>
+
 
         <div className="flex flex-col items-center gap-3 sm:flex-row">
           <Link
