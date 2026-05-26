@@ -4,10 +4,11 @@ import { QuantumField } from "@/components/QuantumField";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Protocolo Soberano — Clareza. Direção. Domínio." },
-      { name: "description", content: "Sistema operacional de alinhamento estratégico, foco e presença executiva." },
-      { property: "og:title", content: "Protocolo Soberano" },
+      { title: "Protocolo Soberano de Harmonia Quântica" },
+      { name: "description", content: "Protocolo Soberano de Harmonia Quântica — sistema operacional de alinhamento estratégico, foco e presença executiva." },
+      { property: "og:title", content: "Protocolo Soberano de Harmonia Quântica" },
       { property: "og:description", content: "Clareza. Direção. Domínio." },
+
     ],
   }),
   component: Landing,
