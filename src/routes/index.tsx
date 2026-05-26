@@ -57,7 +57,7 @@ function Landing() {
         </p>
 
         {/* Nome do protocolo — destaque disruptivo */}
-        <div className="protocol-title-frame mb-6 px-2">
+        <div className="protocol-title-frame mb-10 px-2">
           <h1 className="protocol-title text-balance font-light leading-[0.95] tracking-[-0.02em] text-4xl md:text-6xl lg:text-7xl">
             {"PROTOCOLO SOBERANO".split("").map((c, i) => (
               <span
@@ -83,10 +83,19 @@ function Landing() {
           </h1>
         </div>
 
-        <div className="clarity-statement mb-3 text-xl font-light md:text-2xl">
-          <span className="clarity-word">Clareza.</span>{" "}
-          <span className="clarity-word">Direção.</span>{" "}
-          <span className="clarity-word text-signal">Domínio.</span>
+        {/* Separador visual entre título e tagline */}
+        <div className="mb-6 flex items-center gap-3 opacity-70">
+          <span className="h-px w-10 bg-border" />
+          <span className="text-signal text-xs">◬</span>
+          <span className="h-px w-10 bg-border" />
+        </div>
+
+        <div className="clarity-statement text-mono text-tracked mb-4 text-xs md:text-sm">
+          <span className="clarity-word">CLAREZA</span>
+          <span className="mx-3 text-signal/60">·</span>
+          <span className="clarity-word">DIREÇÃO</span>
+          <span className="mx-3 text-signal/60">·</span>
+          <span className="clarity-word text-signal">DOMÍNIO</span>
         </div>
         <p className="mb-12 max-w-xl text-sm text-muted-foreground md:text-base">
           Uma infraestrutura de foco, posicionamento e presença para quem opera
