@@ -185,12 +185,14 @@
 @keyframes title-glow {
   0%, 100% {
     text-shadow:
-      0 0 10px color-mix(in oklab, var(--signal) 18%, transparent);
+      0 0 14px color-mix(in oklab, var(--signal) 28%, transparent),
+      0 0 32px color-mix(in oklab, var(--signal) 12%, transparent);
   }
   50% {
     text-shadow:
-      0 0 16px color-mix(in oklab, var(--signal) 32%, transparent),
-      0 0 40px color-mix(in oklab, var(--signal) 14%, transparent);
+      0 0 22px color-mix(in oklab, var(--signal) 48%, transparent),
+      0 0 56px color-mix(in oklab, var(--signal) 22%, transparent),
+      0 0 90px color-mix(in oklab, var(--signal) 12%, transparent);
   }
 }
 @keyframes aurora-drift {
@@ -221,9 +223,9 @@
   position: absolute;
   inset: -25% -15%;
   background:
-    radial-gradient(closest-side, color-mix(in oklab, var(--signal) 28%, transparent), transparent 70%),
-    radial-gradient(closest-side at 80% 50%, color-mix(in oklab, var(--elite) 22%, transparent), transparent 70%);
-  filter: blur(50px);
+    radial-gradient(closest-side, color-mix(in oklab, var(--signal) 42%, transparent), transparent 70%),
+    radial-gradient(closest-side at 80% 50%, color-mix(in oklab, var(--elite) 32%, transparent), transparent 70%);
+  filter: blur(60px);
   z-index: 0;
   animation: aurora-drift 11s ease-in-out infinite;
   pointer-events: none;
@@ -236,13 +238,13 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    color-mix(in oklab, var(--signal-glow) 70%, transparent) 50%,
+    color-mix(in oklab, var(--signal-glow) 100%, transparent) 50%,
     transparent 100%
   );
-  filter: blur(20px);
+  filter: blur(28px);
   z-index: 0;
   pointer-events: none;
-  animation: light-sweep-bg 7s ease-in-out infinite;
+  animation: light-sweep-bg 5.5s ease-in-out infinite;
   animation-delay: 1.5s;
 }
 /* Texto SEMPRE acima dos brilhos */
