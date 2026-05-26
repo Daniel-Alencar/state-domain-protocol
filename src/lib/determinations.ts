@@ -120,7 +120,7 @@ const volListeners = new Set<(v: number) => void>();
 // Boost máximo aplicado quando o slider está em 100%. Voz gravada por mic
 // chega com nível baixo (~ -20 dBFS); permitimos ganho > 1 via WebAudio para
 // equiparar à percepção das frequências binaurais.
-const DET_MAX_GAIN = 4;
+const DET_MAX_GAIN = 6;
 
 function gainFromVolume(v: number) {
   return Math.max(0, Math.min(1, v)) * DET_MAX_GAIN;
