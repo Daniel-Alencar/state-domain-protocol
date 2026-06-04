@@ -6,14 +6,12 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// Disable the Cloudflare plugin for Docker/Easypanel deployments (node-server preset).
 // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
+// Keep Cloudflare enabled (default) so the Lovable publish on *.lovable.app works.
 export default defineConfig({
-  cloudflare: false,
   tanstackStart: {
     server: {
       entry: "server",
-      preset: "node-server",
     },
   },
-} as Parameters<typeof defineConfig>[0]);
+});
