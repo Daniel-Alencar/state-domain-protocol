@@ -112,9 +112,9 @@ function Landing() {
         <div className="flex flex-col items-center gap-3 sm:flex-row">
           <Link
             to="/app"
-            className="group inline-flex items-center gap-3 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-all hover:scale-[1.02]"
+            className="group inline-flex items-center gap-3 rounded-full bg-foreground px-7 py-3.5 text-base font-medium text-background transition-all hover:scale-[1.02]"
           >
-            Iniciar calibração
+            Iniciar seu protocolo
             <span className="text-signal-glow text-base transition-transform group-hover:translate-x-1">→</span>
           </Link>
           <Link
