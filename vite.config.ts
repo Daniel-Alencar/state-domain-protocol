@@ -16,4 +16,4 @@ export default defineConfig({
       preset: "node-server",
     },
   },
-});
+} as Parameters<typeof defineConfig>[0]);
