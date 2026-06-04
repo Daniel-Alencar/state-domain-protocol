@@ -282,7 +282,7 @@ function Determinacoes() {
         </div>
 
         {/* ===== Gravador ===== */}
-        <section className="glass-panel rounded-xl p-6">
+        <section className="glass-panel rounded-xl border border-elite/40 p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <div className="text-mono text-tracked text-xs text-signal">Nova determinação</div>
