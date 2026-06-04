@@ -684,6 +684,6 @@ function DeterminationCard({
           </div>
         </details>
       </div>
-    </div>
+    </article>
   );
 }
