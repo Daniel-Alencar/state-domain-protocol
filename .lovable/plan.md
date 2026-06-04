@@ -1,57 +1,82 @@
-## Diagnóstico
+# Plano de revisão
 
-O fluxo de IA + 3 arquétipos pré-aprovados + tocar em loop funciona para a primeira gravação. Para a segunda gravação o botão "Analisar com IA e salvar" parece morto. Três causas prováveis, todas reais no código atual de `src/routes/determinacoes.tsx` + `src/lib/determinations.ts`:
+## 1. Diagnóstico atual da autenticação
 
-1. **Quota do localStorage estoura na 2ª gravação.** Hoje cada gravação é salva como `audioDataUrl` (base64) dentro de `localStorage` na chave `ps:determinations:<userId>`. Uma gravação de 20–40s em base64 já passa de 500 KB–1 MB. localStorage tem ~5 MB no total no navegador. Na 2ª ou 3ª gravação, `localStorage.setItem` lança `QuotaExceededError` silenciosamente dentro de `addDetermination → write`. O usuário vê "o botão não fez nada" porque a análise até roda, mas o save quebra sem feedback.
-2. **Estado do gravador não é totalmente resetado entre gravações.** Quando o loop anterior ainda está tocando e o usuário clica em "Iniciar gravação", o `<audio>` em loop continua reproduzindo as frequências e a voz antiga — o `SpeechRecognition` pode capturar áudio sujo, ou `getUserMedia` em alguns navegadores entra em conflito. Além disso, `mediaRef.current` e `recogRef.current` da gravação anterior não são limpos antes de iniciar a nova.
-3. **Sem feedback visível quando o botão está desabilitado.** O botão fica desabilitado se `!pendingBlob`, `analyzing` ou `transcript.trim().length < 3`. Hoje o usuário não sabe qual condição bloqueou — parece "o botão não funciona".
+**Como está hoje** (`src/routes/login.tsx` + `src/lib/auth-context.tsx`):
+- Signup chama `supabase.auth.signUp` com `emailRedirectTo: /app` — funcional, mas depende da configuração do Auth do backend.
+- Login usa `signInWithPassword`.
+- Reset de senha usa `resetPasswordForEmail` apontando para `/reset-password` (rota existe).
+- Trigger `handle_new_user` insere em `profiles`, `user_roles` e `subscriptions` no signup.
 
-A regra de negócio é clara: **não pode haver limite de gravações**, cada uma com sua análise independente, e qualquer uma deve poder ser tocada em loop com suas 3 frequências pré-aprovadas.
+**Causas prováveis dos sintomas relatados:**
+1. **"Não aceita criar conta"** — provavelmente o Auth do projeto está com `auto_confirm_email = false` (correto para fluxo com confirmação) **mas sem template de email configurado** ou com SMTP padrão limitado, então o email nunca chega → usuário não confirma → login falha com "Email not confirmed".
+2. **"Login falha em contas já criadas"** — mesmas contas nunca foram confirmadas; Supabase bloqueia signIn de email não confirmado.
+3. Mensagens de erro genéricas ("Falha de autenticação") escondem o motivo real.
 
-## Correção
+## 2. Correções de autenticação (sem mexer em outras partes)
 
-### 1. Mover áudio das gravações do localStorage para IndexedDB
-- Criar `src/lib/determinations-audio.ts` com helpers `putAudio(id, blob)`, `getAudioUrl(id)`, `deleteAudio(id)` usando IndexedDB (`indexedDB.open("ps-determinations", 1)` com object store `audio`). IndexedDB tem cota de centenas de MB por origem — efetivamente ilimitado para esse uso.
-- Em `src/lib/determinations.ts`:
-  - Mudar `Determination.audioDataUrl` para opcional e adicionar `hasAudio: boolean`. Não gravar mais base64 no localStorage.
-  - `addDetermination` recebe `audioBlob: Blob`, gera o id, chama `putAudio(id, blob)` e salva apenas metadados (título, transcript, suggestedArchetypes, rationale, preset, hasAudio) no localStorage.
-  - `setActiveDetermination(id)`: ao tocar, resolver a URL via `URL.createObjectURL(await getAudioBlob(id))` e revogar o objectURL no `pause`.
-  - `removeDetermination` também chama `deleteAudio(id)`.
-- Migração: gravações antigas que ainda têm `audioDataUrl` continuam funcionando (fallback). Novas usam IndexedDB.
+1. **Garantir fluxo com confirmação de email ativo**: aplicar `configure_auth` com `auto_confirm_email: false`, `disable_signup: false`, `password_hibp_enabled: true`.
+2. **Provisionar emails da Lovable** (domínio + templates de auth) via `scaffold_auth_email_templates` — gera templates branded para signup, recovery, magic-link etc. Se ainda não houver domínio, abrir o diálogo de setup de email.
+3. **Melhorar mensagens de erro no `login.tsx`** — detectar `email_not_confirmed`, `invalid_credentials`, `user_already_exists` e mostrar texto claro em PT, com botão "Reenviar email de confirmação" (`supabase.auth.resend({ type: 'signup', email })`).
+4. **Tela pós-signup**: em vez de só um toast, mostrar estado "Confirme seu email — enviamos um link para X" com botão de reenviar.
+5. **Adicionar Google OAuth** já existe via `lovable.auth` — garantir provider Google habilitado (`configure_social_auth ["google"]`) para o botão funcionar sem `Unsupported provider`.
+6. Nenhuma alteração em tabelas, triggers, RLS ou outras rotas.
 
-Resultado: usuário pode salvar dezenas de gravações sem estourar nada.
+## 3. Tipografia — landing e telas internas
 
-### 2. Reset robusto entre gravações em `src/routes/determinacoes.tsx`
-- Em `startRec()`:
-  - Se houver loop ativo (`activeId`), parar o loop e as frequências antes de pedir o microfone (chamar `stopPlay()` interno).
-  - Limpar `mediaRef.current = null` e `recogRef.current = null` antes de instanciar novos.
-  - `chunksRef.current = []` (já existe), `setPendingBlob(null)`, `setTranscript("")`, `setAnalyzing(false)`.
-- Em `stopRec()`: garantir que `mediaRef.current = null` ao final, e que `recording` volta para `false` mesmo se `stop()` lançar.
-- `mr.onstop` continua criando o Blob e setando `pendingBlob`.
+Sem mexer em layout/funcionalidade, apenas classes Tailwind e tokens em `src/styles.css`:
 
-### 3. Feedback claro no botão "Analisar com IA e salvar"
-- Mudar o botão para **sempre clicável** (remover `disabled`), e dentro de `analyzeAndSave()` validar com toast explícito:
-  - sem `pendingBlob` → "Grave o áudio primeiro." (já existe)
-  - transcript curto → "Digite o que foi falado abaixo — a IA precisa do texto para sugerir arquétipos."
-  - `analyzing` já em andamento → "Análise em andamento, aguarde."
-- Adicionar `console.log` discreto nos pontos de erro para que, se voltar a falhar, o motivo apareça na aba de logs.
-- Envolver `addDetermination` em try/catch e mostrar toast se falhar (em vez de morrer em silêncio).
+- **`src/routes/index.tsx`** (landing):
+  - "CLAREZA · DIREÇÃO · DOMÍNIO" → subir de `text-xs md:text-sm` para `text-lg md:text-2xl`, peso `font-medium`, cor `text-foreground` (mais claro).
+  - Parágrafo "Uma infraestrutura de foco…" → `text-base md:text-xl`, cor `text-foreground/85` em vez de `text-muted-foreground`.
+  - Botões/links secundários: subir de `text-[10px]` para `text-xs md:text-sm` e cor `text-foreground/80`.
+  - Pilares (01–05): label de `text-sm` para `text-base md:text-lg`, código `text-[10px]` → `text-xs`.
 
-### 4. Tocar em loop continua igual
-- A função `play()` já está correta: para tudo, limpa o estado global, dispara as frequências do `preset` do card e o áudio da gravação em paralelo. Nenhuma mudança aqui.
-- A única diferença é que `setActiveDetermination(id)` em `determinations.ts` agora resolve o blob via IndexedDB e cria um objectURL fresco a cada play.
+- **`src/routes/app.tsx`** (após "Iniciar calibração"): mesmo tratamento — subir tamanhos base e usar `text-foreground` / `text-foreground/85` em vez de `text-muted-foreground` em textos informativos.
 
-## Arquivos a editar
+- **Globais**: criar utilitário `.text-tracked` continua, mas aumentar opacidade padrão de `--muted-foreground` levemente no tema dark para melhor contraste (apenas o token, sem trocar cores semânticas).
 
-- `src/lib/determinations-audio.ts` — novo helper IndexedDB.
-- `src/lib/determinations.ts` — armazenar só metadados no localStorage, áudio no IndexedDB, suportar gravações legadas com `audioDataUrl`.
-- `src/routes/determinacoes.tsx` — reset robusto em `startRec`/`stopRec`, botão "Analisar" sempre clicável com validação por toast, parar loop antes de gravar de novo, try/catch em volta do save.
+## 4. Navegação — fixar 7 abas no mobile (`src/components/AppShell.tsx`)
 
-Nenhuma mudança de schema, RLS, server function ou no engine binaural.
+Hoje a barra inferior usa `justify-around` + `px-2` com 7 itens de `text-[8px]` — em telas estreitas (<360px) o 7º ("Performance") é cortado.
 
-## Resultado esperado
+Mudanças:
+- Trocar layout para `grid grid-cols-7 gap-0` ocupando 100% da largura, com `px-1 py-2`.
+- Cada item: `flex flex-col items-center` com `text-[10px]` (label) e código `text-[9px]`.
+- Labels mais curtos quando necessário só no mobile via classe (ex.: "Performance" → manter, mas reduzir padding lateral).
+- Aumentar contraste: ativo `text-signal`, inativo `text-foreground/70` (em vez de `text-muted-foreground`).
+- Header desktop: subir `text-[10px]` → `text-xs` e cor inativa `text-foreground/70`.
 
-- Posso gravar 1, 5, 20 determinações. Cada uma é analisada pela IA, recebe sua sugestão de 3 arquétipos pré-aprovados e fica salva na lista.
-- Clicar em "Tocar em loop" em qualquer card dispara a voz dessa gravação **+** as 3 frequências do preset daquele card específico.
-- O botão "Analisar com IA e salvar" nunca mais "trava" sem explicação — se algo faltar, sai uma toast dizendo o quê.
-- Iniciar uma nova gravação para automaticamente o loop anterior, evitando contaminação do microfone.
+## 5. Página Determinações — visibilidade e cards (`src/routes/determinacoes.tsx`)
+
+Sem tocar em lógica de gravação/áudio/IA. Apenas estrutura visual:
+
+- **Cabeçalho da seção de gravação**: título "Iniciar gravação" e descrição → `text-base md:text-lg`, cor `text-foreground`.
+- **Label do Volume e botão "Iniciar gravação"**: aumentar para `text-sm`, botão com borda mais clara.
+- **Lista "Suas determinações"**:
+  - Cada item dentro de um `<article>` com classe `rounded-xl border border-border/70 bg-card/60 p-4 md:p-5 shadow-sm` para separação nítida.
+  - Espaçamento entre cards: `space-y-4`.
+  - Linha de topo do card: título da determinação `text-base md:text-lg font-medium text-foreground`; botão **Excluir** alinhado à direita, com `text-foreground/80 hover:text-destructive` e ícone visível (não apenas texto sombreado).
+  - Texto analisado pela IA dentro de bloco `bg-muted/30 rounded-md p-3 text-sm text-foreground/90`.
+  - Linha de ações (play loop, play gravação): botões com `border border-border/70`, label `text-xs` e ícone maior.
+  - Sugestão da IA e pré-aprovados em sub-blocos com `border-t border-border/50 pt-3 mt-3` e título `text-xs uppercase tracking-wider text-foreground/70`.
+- Resultado: cada determinação fica visualmente isolada, com hierarquia clara entre título, transcrição, ações e sugestões — preservando a estética minimal/dark já existente.
+
+## 6. O que NÃO será alterado
+
+- Lógica de gravação, WebAudio, ganho de voz, engine binaural.
+- Esquema de banco, RLS, triggers, funções.
+- Rotas existentes além das citadas.
+- Componentes de outras páginas (Frequências, Arquétipos, Relatos, Rede, Performance) — só herdarão melhoria de contraste via tokens globais e header.
+
+## Detalhes técnicos (resumo de arquivos tocados)
+
+```
+src/routes/login.tsx              → mensagens claras + reenviar confirmação + estado pós-signup
+src/routes/index.tsx              → tamanhos/cores de texto
+src/routes/app.tsx                → tamanhos/cores de texto
+src/components/AppShell.tsx       → grid-cols-7 mobile + tamanhos/contraste
+src/routes/determinacoes.tsx      → cards delimitados + tipografia
+src/styles.css                    → leve ajuste de --muted-foreground (contraste)
++ configure_auth / configure_social_auth / scaffold_auth_email_templates  (backend)
+```
