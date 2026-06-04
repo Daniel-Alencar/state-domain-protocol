@@ -51,9 +51,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {items.map((item) => {
             const active = pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
             return (
-              <Link key={item.to} to={item.to} className="group flex items-center gap-2 text-mono text-tracked text-[10px]">
-                <span className={active ? "text-signal" : "text-muted-foreground/60"}>{item.code}</span>
-                <span className={active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"}>
+              <Link key={item.to} to={item.to} className="group flex items-center gap-2 text-mono text-tracked text-xs">
+                <span className={active ? "text-signal" : "text-foreground/50"}>{item.code}</span>
+                <span className={active ? "text-foreground" : "text-foreground/80 group-hover:text-foreground"}>
                   {item.label}
                 </span>
               </Link>
@@ -78,20 +78,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="relative z-10">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-border/60 bg-background/90 backdrop-blur-lg md:hidden">
-        <div className="flex items-center justify-around px-2 py-2">
+      <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-border/60 bg-background/95 backdrop-blur-lg md:hidden">
+        <div className="grid grid-cols-7 gap-0 px-1 py-2">
           {items.map((item) => {
             const active = pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex flex-col items-center gap-0.5 px-2 py-1 text-mono text-tracked text-[8px] ${
-                  active ? "text-signal" : "text-muted-foreground"
+                className={`flex min-w-0 flex-col items-center gap-0.5 px-0.5 py-1 text-center text-mono text-tracked text-[10px] leading-tight ${
+                  active ? "text-signal" : "text-foreground/80"
                 }`}
               >
-                <span className="text-[10px]">{item.code}</span>
-                <span>{item.label}</span>
+                <span className={`text-[10px] ${active ? "text-signal" : "text-foreground/60"}`}>{item.code}</span>
+                <span className="truncate w-full">{item.label}</span>
               </Link>
             );
           })}

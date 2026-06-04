@@ -74,14 +74,14 @@ function Landing() {
           <span className="h-px w-10 bg-border" />
         </div>
 
-        <div className="clarity-statement text-mono text-tracked mb-4 text-xs md:text-sm">
-          <span className="clarity-word">CLAREZA</span>
-          <span className="mx-3 text-signal/60">·</span>
-          <span className="clarity-word">DIREÇÃO</span>
-          <span className="mx-3 text-signal/60">·</span>
+        <div className="clarity-statement text-mono text-tracked mb-6 text-lg md:text-2xl font-medium">
+          <span className="clarity-word text-foreground">CLAREZA</span>
+          <span className="mx-3 text-signal/70">·</span>
+          <span className="clarity-word text-foreground">DIREÇÃO</span>
+          <span className="mx-3 text-signal/70">·</span>
           <span className="clarity-word text-signal">DOMÍNIO</span>
         </div>
-        <p className="mb-12 max-w-xl text-sm text-muted-foreground md:text-base">
+        <p className="mb-12 max-w-2xl text-base text-foreground/85 md:text-xl leading-relaxed">
           Uma infraestrutura de foco, posicionamento e presença para quem opera
           em ambientes de decisão.
         </p>
@@ -96,25 +96,25 @@ function Landing() {
           </Link>
           <Link
             to="/arquetipos"
-            className="text-mono text-tracked rounded-full border border-border px-6 py-3 text-[10px] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+            className="text-mono text-tracked rounded-full border border-border px-6 py-3 text-xs md:text-sm text-foreground/85 transition-colors hover:border-foreground hover:text-foreground"
           >
             Ver arquétipos
           </Link>
           <Link
             to="/como-utilizar"
-            className="text-mono text-tracked rounded-full border border-signal/40 px-6 py-3 text-[10px] text-signal/90 transition-all hover:border-signal hover:text-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
+            className="text-mono text-tracked rounded-full border border-signal/40 px-6 py-3 text-xs md:text-sm text-signal transition-all hover:border-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
           >
             Como Utilizar
           </Link>
           <Link
             to="/a-ciencia-do-protocolo"
-            className="text-mono text-tracked rounded-full border border-border px-6 py-3 text-[10px] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+            className="text-mono text-tracked rounded-full border border-border px-6 py-3 text-xs md:text-sm text-foreground/85 transition-colors hover:border-foreground hover:text-foreground"
           >
             A ciência do Protocolo
           </Link>
           <Link
             to="/treinamento-maestria-frequencial"
-            className="text-mono text-tracked rounded-full border border-signal/40 px-6 py-3 text-[10px] text-signal/90 transition-all hover:border-signal hover:text-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
+            className="text-mono text-tracked rounded-full border border-signal/40 px-6 py-3 text-xs md:text-sm text-signal transition-all hover:border-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
           >
             Treinamento em Maestria Frequencial
           </Link>
@@ -135,8 +135,8 @@ function Landing() {
               key={pillar.code}
               className="border-b border-r border-border/60 px-6 py-8 last:border-r-0 md:border-b-0"
             >
-              <div className="text-mono text-tracked text-[10px] text-signal">{pillar.code}</div>
-              <div className="mt-2 text-sm text-foreground">{pillar.label}</div>
+              <div className="text-mono text-tracked text-xs text-signal">{pillar.code}</div>
+              <div className="mt-2 text-base md:text-lg text-foreground">{pillar.label}</div>
             </div>
           ))}
         </div>

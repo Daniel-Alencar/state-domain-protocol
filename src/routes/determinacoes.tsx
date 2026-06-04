@@ -283,28 +283,28 @@ function Determinacoes() {
 
         {/* ===== Gravador ===== */}
         <section className="glass-panel rounded-xl p-6">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <div className="text-mono text-tracked text-[9px] text-signal">Nova determinação</div>
-              <div className="text-lg font-light text-foreground">Gravar voz</div>
+              <div className="text-mono text-tracked text-xs text-signal">Nova determinação</div>
+              <div className="text-xl md:text-2xl font-light text-foreground">Gravar voz</div>
             </div>
             <div className="flex items-center gap-2">
             {!recording ? (
               <div className="flex flex-col items-end gap-1">
                 <button
                   onClick={startRec}
-                  className="text-mono text-tracked rounded-full bg-foreground px-5 py-2 text-[11px] text-background"
+                  className="text-mono text-tracked rounded-full bg-foreground px-5 py-2.5 text-sm text-background"
                 >
                   ● Iniciar gravação
                 </button>
-                <span className="text-mono text-tracked text-[9px] text-signal">
+                <span className="text-mono text-tracked text-[10px] text-signal">
                   Não saia da tela durante a gravação
                 </span>
               </div>
             ) : (
                 <button
                   onClick={stopRec}
-                  className="text-mono text-tracked rounded-full bg-destructive px-5 py-2 text-[11px] text-destructive-foreground"
+                  className="text-mono text-tracked rounded-full bg-destructive px-5 py-2.5 text-sm text-destructive-foreground"
                 >
                   ■ Parar
                 </button>
@@ -313,7 +313,7 @@ function Determinacoes() {
           </div>
 
           {recording && (
-            <div className="mb-4 flex items-center gap-2 text-[11px] text-signal">
+            <div className="mb-4 flex items-center gap-2 text-sm text-signal">
               <span className="h-2 w-2 animate-pulse rounded-full bg-signal" />
               Gravando… fale sua determinação em primeira pessoa. Sem limite de tempo — vai até você
               clicar em <strong className="ml-1">Parar</strong>.
@@ -322,18 +322,18 @@ function Determinacoes() {
 
           <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
             <div>
-              <label className="text-mono text-tracked text-[9px] text-muted-foreground">
+              <label className="text-mono text-tracked text-xs text-foreground/85">
                 Título (opcional)
               </label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex.: Foco para a entrega de sexta"
-                className="mt-1 w-full rounded-md border border-border/60 bg-background/40 px-3 py-2 text-sm text-foreground focus:border-signal/60 focus:outline-none"
+                className="mt-1 w-full rounded-md border border-border/60 bg-background/40 px-3 py-2 text-base text-foreground focus:border-signal/60 focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-mono text-tracked text-[9px] text-muted-foreground">
+              <label className="text-mono text-tracked text-xs text-foreground/85">
                 Texto da determinação (digite ou cole após gravar)
               </label>
               <textarea
@@ -341,7 +341,7 @@ function Determinacoes() {
                 onChange={(e) => setTranscript(e.target.value)}
                 rows={3}
                 placeholder="Para manter a gravação limpa e sem ding, a transcrição automática foi desligada. Depois de gravar, digite ou cole aqui o que você falou para a IA sugerir arquétipos."
-                className="mt-1 w-full rounded-md border border-border/60 bg-background/40 px-3 py-2 text-sm text-foreground focus:border-signal/60 focus:outline-none"
+                className="mt-1 w-full rounded-md border border-border/60 bg-background/40 px-3 py-2 text-base text-foreground focus:border-signal/60 focus:outline-none"
               />
             </div>
           </div>
@@ -358,12 +358,12 @@ function Determinacoes() {
             <button
               disabled={analyzing}
               onClick={analyzeAndSave}
-              className="text-mono text-tracked rounded-full bg-signal px-5 py-2 text-[11px] text-background disabled:opacity-40"
+              className="text-mono text-tracked rounded-full bg-signal px-5 py-2.5 text-sm text-background disabled:opacity-40"
             >
               {analyzing ? "Analisando…" : "Analisar com IA e salvar"}
             </button>
             {pendingBlob && (
-              <span className="text-mono text-tracked text-[10px] text-muted-foreground">
+              <span className="text-mono text-tracked text-xs text-foreground/80">
                 Áudio pronto · {(pendingBlob.size / 1024).toFixed(0)} KB
               </span>
             )}
@@ -372,13 +372,13 @@ function Determinacoes() {
 
         {/* ===== Lista ===== */}
         <section className="mt-10">
-          <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
+          <div className="text-mono text-tracked mb-4 text-sm text-signal">
             Suas determinações
           </div>
           {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma gravação ainda.</p>
+            <p className="text-base text-foreground/85">Nenhuma gravação ainda.</p>
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               {items.map((d) => (
                 <DeterminationCard
                   key={d.id}
@@ -411,13 +411,13 @@ function VolumeControl({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-mono text-tracked text-[9px] text-muted-foreground">{label}</span>
-        <span className="text-mono text-tracked text-[10px] text-foreground">
+        <span className="text-mono text-tracked text-xs text-foreground/85">{label}</span>
+        <span className="text-mono text-tracked text-sm text-foreground">
           {Math.round(value * 100)}%
         </span>
       </div>
       <Slider value={[value * 100]} max={100} step={1} onValueChange={([v]) => onChange(v / 100)} />
-      <p className="mt-1 text-[10px] text-muted-foreground">{hint}</p>
+      <p className="mt-1 text-xs text-foreground/75">{hint}</p>
     </div>
   );
 }
@@ -518,8 +518,12 @@ function DeterminationCard({
   }
 
   return (
-    <div className={`glass-panel rounded-lg p-4 ${isActive ? "border-signal/60" : ""}`}>
-      <div className="flex items-start justify-between gap-3">
+    <article
+      className={`rounded-xl border-2 bg-card/70 p-5 shadow-sm transition-all ${
+        isActive ? "border-signal/70 shadow-[0_0_24px_color-mix(in_oklab,var(--signal-glow)_30%,transparent)]" : "border-border/70 hover:border-foreground/30"
+      }`}
+    >
+      <header className="flex items-start justify-between gap-3 border-b border-border/50 pb-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             {editingTitle ? (
@@ -535,7 +539,7 @@ function DeterminationCard({
                     setEditingTitle(false);
                   }
                 }}
-                className="w-full rounded-md border border-signal/40 bg-background/60 px-2 py-1 text-sm text-foreground focus:outline-none"
+                className="w-full rounded-md border border-signal/40 bg-background/60 px-2 py-1 text-base text-foreground focus:outline-none"
               />
             ) : (
               <button
@@ -543,46 +547,49 @@ function DeterminationCard({
                   setTitleDraft(d.title);
                   setEditingTitle(true);
                 }}
-                className="truncate text-left text-sm font-medium text-foreground hover:text-signal"
+                className="truncate text-left text-base md:text-lg font-medium text-foreground hover:text-signal"
               >
                 {d.title}
               </button>
             )}
-            {isActive && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-signal" />}
+            {isActive && <span className="h-2 w-2 animate-pulse rounded-full bg-signal" />}
           </div>
-          <div className="text-mono text-tracked text-[9px] text-muted-foreground">
+          <div className="text-mono text-tracked mt-1 text-[10px] text-foreground/70">
             {new Date(d.createdAt).toLocaleString("pt-BR")} · toque no título para editar
           </div>
         </div>
         <button
           onClick={onRemove}
-          className="text-mono text-tracked rounded-full border border-border/60 px-2 py-0.5 text-[9px] text-muted-foreground hover:text-destructive"
+          className="text-mono text-tracked rounded-full border border-destructive/60 px-3 py-1 text-xs text-destructive hover:bg-destructive/15"
         >
-          excluir
+          Excluir
         </button>
-      </div>
+      </header>
 
       {d.transcript && (
-        <p className="mt-2 line-clamp-3 text-xs text-foreground/80">{d.transcript}</p>
+        <div className="mt-3 rounded-md bg-muted/30 p-3">
+          <div className="text-mono text-tracked mb-1 text-[10px] text-foreground/70">Texto analisado</div>
+          <p className="line-clamp-4 text-sm text-foreground/95">{d.transcript}</p>
+        </div>
       )}
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         {isActive ? (
           <button
             onClick={onStop}
-            className="text-mono text-tracked rounded-full bg-destructive px-4 py-1.5 text-[10px] text-destructive-foreground"
+            className="text-mono text-tracked rounded-full bg-destructive px-4 py-2 text-xs text-destructive-foreground"
           >
-            Parar loop
+            ■ Parar loop
           </button>
         ) : (
           <button
             onClick={() => onPlay(preset)}
-            className="text-mono text-tracked rounded-full bg-foreground px-4 py-1.5 text-[10px] text-background"
+            className="text-mono text-tracked rounded-full bg-foreground px-4 py-2 text-xs text-background"
           >
             ▶ Tocar em loop
           </button>
         )}
-        {audioSrc && <audio src={audioSrc} controls className="h-8 max-w-[180px]" />}
+        {audioSrc && <audio src={audioSrc} controls className="h-9 max-w-[200px]" />}
       </div>
 
       {/* Sugestão da IA + justificativa */}
@@ -677,6 +684,6 @@ function DeterminationCard({
           </div>
         </details>
       </div>
-    </div>
+    </article>
   );
 }
