@@ -252,6 +252,43 @@ function Login() {
             </div>
           )}
 
+          {mode === "signup" && (
+            <div className="space-y-2 rounded-md border border-border/40 bg-card/30 p-3">
+              <label className="flex cursor-pointer items-start gap-2 text-xs text-foreground/90">
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 flex-shrink-0 accent-signal"
+                  required
+                />
+                <span>
+                  Li e aceito os{" "}
+                  <Link to="/termos-de-uso" target="_blank" className="text-signal underline hover:text-signal/80">
+                    Termos de Uso
+                  </Link>{" "}
+                  e a{" "}
+                  <Link to="/lgpd" target="_blank" className="text-signal underline hover:text-signal/80">
+                    Política de Privacidade (LGPD)
+                  </Link>
+                  .
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-2 text-xs text-foreground/80">
+                <input
+                  type="checkbox"
+                  checked={acceptAds}
+                  onChange={(e) => setAcceptAds(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 flex-shrink-0 accent-signal"
+                />
+                <span>
+                  Aceito receber comunicações de marketing, novidades e publicidade do Instituto
+                  Venditti. Posso revogar este consentimento a qualquer momento.
+                </span>
+              </label>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={busy}
