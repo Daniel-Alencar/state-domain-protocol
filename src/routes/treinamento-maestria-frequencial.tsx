@@ -136,6 +136,8 @@ function TreinamentoMaestriaFrequencial() {
           </div>
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }

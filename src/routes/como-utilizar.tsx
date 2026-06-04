@@ -66,6 +66,8 @@ function ComoUtilizar() {
           />
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }

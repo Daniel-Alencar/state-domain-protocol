@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { QuantumField } from "@/components/QuantumField";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -164,6 +165,8 @@ function Landing() {
           ))}
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }

@@ -260,6 +260,8 @@ function ACienciaDoProtocolo() {
           </div>
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }
