@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /frequencias
+Disallow: /arquetipos
+Disallow: /determinacoes
+Disallow: /relatos
+Disallow: /networking
+Disallow: /performance
+Disallow: /manual
+Disallow: /login
+Disallow: /reset-password
+
+Sitemap: https://state-domain-protocol.lovable.app/sitemap.xml

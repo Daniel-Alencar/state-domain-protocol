@@ -4,11 +4,34 @@ import { QuantumField } from "@/components/QuantumField";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Protocolo Soberano de Harmonia Quântica" },
-      { name: "description", content: "Protocolo Soberano de Harmonia Quântica — sistema operacional de alinhamento estratégico, foco e presença executiva." },
+      { title: "Protocolo Soberano de Harmonia Quântica — Treinamento Empresarial e Ressonância Harmônica" },
+      { name: "description", content: "Protocolo Soberano de Harmonia Quântica: treinamento empresarial em ressonância harmônica, harmonia quântica, universo quântico e física quântica aplicada à alta performance e presença executiva." },
+      { name: "keywords", content: "treinamento empresarial, ressonância harmônica, harmonia quântica, universo quântico, física quântica, frequências binaurais, alta performance, mentalidade quântica, alinhamento executivo, neuroacústica" },
       { property: "og:title", content: "Protocolo Soberano de Harmonia Quântica" },
-      { property: "og:description", content: "Clareza. Direção. Domínio." },
-
+      { property: "og:description", content: "Treinamento empresarial em ressonância harmônica e física quântica aplicada. Clareza. Direção. Domínio." },
+      { property: "og:url", content: "https://state-domain-protocol.lovable.app/" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://state-domain-protocol.lovable.app/" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Protocolo Soberano de Harmonia Quântica",
+          url: "https://state-domain-protocol.lovable.app",
+          inLanguage: "pt-BR",
+          about: [
+            "Treinamento empresarial",
+            "Ressonância harmônica",
+            "Harmonia quântica",
+            "Universo quântico",
+            "Física quântica",
+          ],
+        }),
+      },
     ],
   }),
   component: Landing,

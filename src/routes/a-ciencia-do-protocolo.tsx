@@ -4,8 +4,15 @@ import { QuantumField } from "@/components/QuantumField";
 export const Route = createFileRoute("/a-ciencia-do-protocolo")({
   head: () => ({
     meta: [
-      { title: "A Ciência do Protocolo — Protocolo Soberano de Harmonia Quântica" },
-      { name: "description", content: "Entenda a ciência ancestral e neuroacústica por trás do Protocolo Soberano de Harmonia Quântica." },
+      { title: "A Ciência do Protocolo — Física Quântica, Ressonância Harmônica e Harmonia Quântica" },
+      { name: "description", content: "A base científica do Protocolo Soberano: física quântica, ressonância harmônica, harmonia quântica e neuroacústica aplicadas à performance e ao universo quântico interior." },
+      { name: "keywords", content: "física quântica, harmonia quântica, ressonância harmônica, universo quântico, neuroacústica, frequências binaurais, treinamento empresarial" },
+      { property: "og:title", content: "A Ciência do Protocolo Soberano de Harmonia Quântica" },
+      { property: "og:description", content: "Física quântica, ressonância harmônica e neuroacústica aplicadas à alta performance." },
+      { property: "og:url", content: "https://state-domain-protocol.lovable.app/a-ciencia-do-protocolo" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://state-domain-protocol.lovable.app/a-ciencia-do-protocolo" },
     ],
   }),
   component: ACienciaDoProtocolo,
