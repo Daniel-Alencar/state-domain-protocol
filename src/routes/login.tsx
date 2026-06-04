@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
@@ -24,8 +24,8 @@ function translateError(message: string): string {
     return "Este email já está cadastrado. Faça login ou recupere sua senha.";
   if (m.includes("password") && m.includes("8"))
     return "Sua senha precisa ter pelo menos 8 caracteres.";
-  if (m.includes("pwned") || m.includes("compromised"))
-    return "Essa senha apareceu em vazamentos públicos. Escolha outra mais segura.";
+  if (m.includes("pwned") || m.includes("compromised") || m.includes("known to be weak"))
+    return "ALERTA — Esta senha já apareceu em algum vazamento de dados pelo mundo. Use outra.";
   if (m.includes("rate") || m.includes("too many"))
     return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
   if (m.includes("unsupported provider"))
