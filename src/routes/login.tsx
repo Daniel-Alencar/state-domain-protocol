@@ -240,6 +240,15 @@ function Login() {
             </div>
           )}
 
+          {mode === "signup" && (
+            <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-2.5">
+              <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-destructive" />
+              <p className="text-[11px] leading-snug text-foreground/90">
+                <span className="font-semibold text-destructive">ALERTA</span> — Esta senha já apareceu em algum vazamento de dados pelo mundo. Use outra.
+              </p>
+            </div>
+          )}
+
           {mode === "login" && (
             <div className="flex justify-end">
               <button
