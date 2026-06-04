@@ -520,7 +520,7 @@ function DeterminationCard({
   return (
     <article
       className={`rounded-xl border-2 bg-card/70 p-5 shadow-sm transition-all ${
-        isActive ? "border-signal/70 shadow-[0_0_24px_color-mix(in_oklab,var(--signal-glow)_30%,transparent)]" : "border-border/70 hover:border-foreground/30"
+        isActive ? "border-signal/70 shadow-[0_0_24px_color-mix(in_oklab,var(--signal-glow)_30%,transparent)]" : "border-elite/40 hover:border-foreground/50"
       }`}
     >
       <header className="flex items-start justify-between gap-3 border-b border-border/50 pb-3">
