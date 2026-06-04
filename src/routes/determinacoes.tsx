@@ -233,7 +233,7 @@ function Determinacoes() {
         </div>
 
         {/* ===== Engenharia de Volumes ===== */}
-        <div className="glass-panel mb-6 rounded-xl p-5">
+        <div className="glass-panel mb-6 rounded-xl border border-elite/40 p-5">
           <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
             Engenharia de volumes
           </div>
@@ -282,7 +282,7 @@ function Determinacoes() {
         </div>
 
         {/* ===== Gravador ===== */}
-        <section className="glass-panel rounded-xl p-6">
+        <section className="glass-panel rounded-xl border border-elite/40 p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <div className="text-mono text-tracked text-xs text-signal">Nova determinação</div>
