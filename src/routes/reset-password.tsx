@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,9 +14,47 @@ function ResetPassword() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Capture errors from the URL hash (expired/invalid recovery link)
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash.startsWith("#")
+        ? window.location.hash.substring(1)
+        : window.location.hash;
+      const params = new URLSearchParams(hash);
+      const err = params.get("error_description") || params.get("error");
+      if (err) {
+        setLinkError(decodeURIComponent(err.replace(/\+/g, " ")));
+      }
+    }
+
+    // Listen for PASSWORD_RECOVERY event triggered by Supabase when it parses the URL hash
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || (session && event === "SIGNED_IN")) {
+        setHasSession(true);
+      }
+    });
+
+    // Also check existing session (in case the hash was already consumed)
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setHasSession(true);
+      setReady(true);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!hasSession) {
+      toast.error("Sessão de recuperação ausente", {
+        description: "Abra novamente o link de recuperação enviado para seu email. O link expira em poucos minutos e só pode ser usado uma vez.",
+      });
+      return;
+    }
     setBusy(true);
     try {
       const { error } = await supabase.auth.updateUser({ password });
