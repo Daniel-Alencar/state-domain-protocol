@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +45,8 @@ function Login() {
   const [busy, setBusy] = useState(false);
   const [pendingConfirmEmail, setPendingConfirmEmail] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptAds, setAcceptAds] = useState(false);
 
   useEffect(() => {
     if (user) navigate({ to: redirect });
@@ -64,12 +66,23 @@ function Login() {
         });
         setMode("login");
       } else if (mode === "signup") {
+        if (!acceptTerms) {
+          toast.error("Aceite necessário", {
+            description: "Para criar sua conta, aceite os Termos de Uso e a Política de LGPD.",
+          });
+          setBusy(false);
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/app`,
-            data: { display_name: name || email },
+            data: {
+              display_name: name || email,
+              accepted_terms_at: new Date().toISOString(),
+              marketing_consent: acceptAds,
+            },
           },
         });
         if (error) throw error;
