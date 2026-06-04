@@ -56,12 +56,12 @@ function Cockpit() {
     <AppShell>
       <div className="mx-auto max-w-5xl px-6 pb-32 pt-10 md:pt-16">
         <div className="mb-12 text-center">
-          <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
+          <div className="text-mono text-tracked mb-3 text-xs text-signal">
             {activeIds.length
               ? `${activeIds.length} arquétipo(s) em execução`
               : "Frequência Base · sem arquétipo"}
           </div>
-          <p className="mx-auto max-w-xl text-lg font-light text-foreground md:text-xl">{greeting}</p>
+          <p className="mx-auto max-w-2xl text-xl font-light text-foreground md:text-2xl leading-relaxed">{greeting}</p>
         </div>
 
         <div className="flex justify-center">
@@ -71,13 +71,13 @@ function Cockpit() {
         {/* ===== Painel de estados ativos ===== */}
         <div className="mt-10 glass-panel rounded-xl p-5">
           <div className="mb-3 flex items-center justify-between">
-            <div className="text-mono text-tracked text-[10px] text-signal">
+            <div className="text-mono text-tracked text-xs text-signal">
               Estados em execução
             </div>
             {(activeIds.length > 0 || activeDet) && (
               <button
                 onClick={deactivateAll}
-                className="text-mono text-tracked rounded-full border border-destructive/60 px-3 py-1 text-[10px] text-destructive hover:bg-destructive/10"
+                className="text-mono text-tracked rounded-full border border-destructive/60 px-3 py-1 text-xs text-destructive hover:bg-destructive/10"
               >
                 Desligar tudo
               </button>
@@ -85,7 +85,7 @@ function Cockpit() {
           </div>
 
           {activeIds.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-foreground/85">
               Nenhum arquétipo ativo. Vá em <Link to="/arquetipos" className="text-signal">Arquétipos</Link> e acione um estado.
             </p>
           ) : (
@@ -150,7 +150,7 @@ function Cockpit() {
         <div className="mt-10 text-center">
           <Link
             to="/manual"
-            className="text-mono text-tracked text-[10px] text-muted-foreground hover:text-signal"
+            className="text-mono text-tracked text-xs text-foreground/80 hover:text-signal"
           >
             Abrir Manual do Protocolo →
           </Link>
@@ -166,10 +166,10 @@ function ActionCard({ to, code, title, desc }: { to: string; code: string; title
       to={to}
       className="group glass-panel relative overflow-hidden rounded-lg p-5 transition-all hover:border-signal/40"
     >
-      <div className="text-mono text-tracked mb-3 text-[10px] text-signal">{code}</div>
-      <div className="mb-1 text-sm font-medium text-foreground">{title}</div>
-      <div className="text-xs text-muted-foreground">{desc}</div>
-      <span className="absolute right-4 top-4 text-muted-foreground transition-all group-hover:text-signal group-hover:translate-x-1">→</span>
+      <div className="text-mono text-tracked mb-3 text-xs text-signal">{code}</div>
+      <div className="mb-1 text-base font-medium text-foreground">{title}</div>
+      <div className="text-sm text-foreground/80">{desc}</div>
+      <span className="absolute right-4 top-4 text-foreground/70 transition-all group-hover:text-signal group-hover:translate-x-1">→</span>
     </Link>
   );
 }
@@ -177,10 +177,10 @@ function ActionCard({ to, code, title, desc }: { to: string; code: string; title
 function Stat({ label, value, trend }: { label: string; value: string; trend: string }) {
   return (
     <div className="bg-card/40 px-5 py-4">
-      <div className="text-mono text-tracked text-[9px] text-muted-foreground">{label}</div>
+      <div className="text-mono text-tracked text-[10px] text-foreground/70">{label}</div>
       <div className="mt-2 flex items-baseline justify-between">
         <span className="text-lg font-medium text-foreground">{value}</span>
-        <span className="text-mono text-[10px] text-signal">{trend}</span>
+        <span className="text-mono text-xs text-signal">{trend}</span>
       </div>
     </div>
   );
