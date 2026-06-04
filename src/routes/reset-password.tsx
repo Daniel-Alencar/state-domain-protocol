@@ -54,7 +54,7 @@ function ResetPassword() {
               type="button"
               onClick={() => setShow((v) => !v)}
               aria-label={show ? "Ocultar senha" : "Mostrar senha"}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-1.5 text-foreground shadow-sm hover:bg-background"
             >
               {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
