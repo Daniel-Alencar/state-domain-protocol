@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TreinamentoMaestriaFrequencialRouteImport } from './routes/treinamento-maestria-frequencial'
+import { Route as TermosDeUsoRouteImport } from './routes/termos-de-uso'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RelatosRouteImport } from './routes/relatos'
@@ -17,6 +18,7 @@ import { Route as PerformanceRouteImport } from './routes/performance'
 import { Route as NetworkingRouteImport } from './routes/networking'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LgpdRouteImport } from './routes/lgpd'
 import { Route as FrequenciasRouteImport } from './routes/frequencias'
 import { Route as DeterminacoesRouteImport } from './routes/determinacoes'
 import { Route as ComoUtilizarRouteImport } from './routes/como-utilizar'
@@ -31,6 +33,11 @@ const TreinamentoMaestriaFrequencialRoute =
     path: '/treinamento-maestria-frequencial',
     getParentRoute: () => rootRouteImport,
   } as any)
+const TermosDeUsoRoute = TermosDeUsoRouteImport.update({
+  id: '/termos-de-uso',
+  path: '/termos-de-uso',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -64,6 +71,11 @@ const ManualRoute = ManualRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LgpdRoute = LgpdRouteImport.update({
+  id: '/lgpd',
+  path: '/lgpd',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrequenciasRoute = FrequenciasRouteImport.update({
@@ -110,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/como-utilizar': typeof ComoUtilizarRoute
   '/determinacoes': typeof DeterminacoesRoute
   '/frequencias': typeof FrequenciasRoute
+  '/lgpd': typeof LgpdRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
@@ -117,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRoutesByTo {
@@ -127,6 +141,7 @@ export interface FileRoutesByTo {
   '/como-utilizar': typeof ComoUtilizarRoute
   '/determinacoes': typeof DeterminacoesRoute
   '/frequencias': typeof FrequenciasRoute
+  '/lgpd': typeof LgpdRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
@@ -134,6 +149,7 @@ export interface FileRoutesByTo {
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRoutesById {
@@ -145,6 +161,7 @@ export interface FileRoutesById {
   '/como-utilizar': typeof ComoUtilizarRoute
   '/determinacoes': typeof DeterminacoesRoute
   '/frequencias': typeof FrequenciasRoute
+  '/lgpd': typeof LgpdRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
@@ -152,6 +169,7 @@ export interface FileRoutesById {
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRouteTypes {
@@ -164,6 +182,7 @@ export interface FileRouteTypes {
     | '/como-utilizar'
     | '/determinacoes'
     | '/frequencias'
+    | '/lgpd'
     | '/login'
     | '/manual'
     | '/networking'
@@ -171,6 +190,7 @@ export interface FileRouteTypes {
     | '/relatos'
     | '/reset-password'
     | '/sitemap.xml'
+    | '/termos-de-uso'
     | '/treinamento-maestria-frequencial'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -181,6 +201,7 @@ export interface FileRouteTypes {
     | '/como-utilizar'
     | '/determinacoes'
     | '/frequencias'
+    | '/lgpd'
     | '/login'
     | '/manual'
     | '/networking'
@@ -188,6 +209,7 @@ export interface FileRouteTypes {
     | '/relatos'
     | '/reset-password'
     | '/sitemap.xml'
+    | '/termos-de-uso'
     | '/treinamento-maestria-frequencial'
   id:
     | '__root__'
@@ -198,6 +220,7 @@ export interface FileRouteTypes {
     | '/como-utilizar'
     | '/determinacoes'
     | '/frequencias'
+    | '/lgpd'
     | '/login'
     | '/manual'
     | '/networking'
@@ -205,6 +228,7 @@ export interface FileRouteTypes {
     | '/relatos'
     | '/reset-password'
     | '/sitemap.xml'
+    | '/termos-de-uso'
     | '/treinamento-maestria-frequencial'
   fileRoutesById: FileRoutesById
 }
@@ -216,6 +240,7 @@ export interface RootRouteChildren {
   ComoUtilizarRoute: typeof ComoUtilizarRoute
   DeterminacoesRoute: typeof DeterminacoesRoute
   FrequenciasRoute: typeof FrequenciasRoute
+  LgpdRoute: typeof LgpdRoute
   LoginRoute: typeof LoginRoute
   ManualRoute: typeof ManualRoute
   NetworkingRoute: typeof NetworkingRoute
@@ -223,6 +248,7 @@ export interface RootRouteChildren {
   RelatosRoute: typeof RelatosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermosDeUsoRoute: typeof TermosDeUsoRoute
   TreinamentoMaestriaFrequencialRoute: typeof TreinamentoMaestriaFrequencialRoute
 }
 
@@ -233,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/treinamento-maestria-frequencial'
       fullPath: '/treinamento-maestria-frequencial'
       preLoaderRoute: typeof TreinamentoMaestriaFrequencialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos-de-uso': {
+      id: '/termos-de-uso'
+      path: '/termos-de-uso'
+      fullPath: '/termos-de-uso'
+      preLoaderRoute: typeof TermosDeUsoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -282,6 +315,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lgpd': {
+      id: '/lgpd'
+      path: '/lgpd'
+      fullPath: '/lgpd'
+      preLoaderRoute: typeof LgpdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/frequencias': {
@@ -344,6 +384,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComoUtilizarRoute: ComoUtilizarRoute,
   DeterminacoesRoute: DeterminacoesRoute,
   FrequenciasRoute: FrequenciasRoute,
+  LgpdRoute: LgpdRoute,
   LoginRoute: LoginRoute,
   ManualRoute: ManualRoute,
   NetworkingRoute: NetworkingRoute,
@@ -351,6 +392,7 @@ const rootRouteChildren: RootRouteChildren = {
   RelatosRoute: RelatosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermosDeUsoRoute: TermosDeUsoRoute,
   TreinamentoMaestriaFrequencialRoute: TreinamentoMaestriaFrequencialRoute,
 }
 export const routeTree = rootRouteImport

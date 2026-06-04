@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +45,8 @@ function Login() {
   const [busy, setBusy] = useState(false);
   const [pendingConfirmEmail, setPendingConfirmEmail] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptAds, setAcceptAds] = useState(false);
 
   useEffect(() => {
     if (user) navigate({ to: redirect });
@@ -64,12 +66,23 @@ function Login() {
         });
         setMode("login");
       } else if (mode === "signup") {
+        if (!acceptTerms) {
+          toast.error("Aceite necessário", {
+            description: "Para criar sua conta, aceite os Termos de Uso e a Política de LGPD.",
+          });
+          setBusy(false);
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/app`,
-            data: { display_name: name || email },
+            data: {
+              display_name: name || email,
+              accepted_terms_at: new Date().toISOString(),
+              marketing_consent: acceptAds,
+            },
           },
         });
         if (error) throw error;
@@ -236,6 +249,43 @@ function Login() {
               >
                 Esqueci minha senha
               </button>
+            </div>
+          )}
+
+          {mode === "signup" && (
+            <div className="space-y-2 rounded-md border border-border/40 bg-card/30 p-3">
+              <label className="flex cursor-pointer items-start gap-2 text-xs text-foreground/90">
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 flex-shrink-0 accent-signal"
+                  required
+                />
+                <span>
+                  Li e aceito os{" "}
+                  <Link to="/termos-de-uso" target="_blank" className="text-signal underline hover:text-signal/80">
+                    Termos de Uso
+                  </Link>{" "}
+                  e a{" "}
+                  <Link to="/lgpd" target="_blank" className="text-signal underline hover:text-signal/80">
+                    Política de Privacidade (LGPD)
+                  </Link>
+                  .
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-2 text-xs text-foreground/80">
+                <input
+                  type="checkbox"
+                  checked={acceptAds}
+                  onChange={(e) => setAcceptAds(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 flex-shrink-0 accent-signal"
+                />
+                <span>
+                  Aceito receber comunicações de marketing, novidades e publicidade do Instituto
+                  Venditti. Posso revogar este consentimento a qualquer momento.
+                </span>
+              </label>
             </div>
           )}
 

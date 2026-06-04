@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteFooter } from "@/components/SiteFooter";
 import { QuantumField } from "@/components/QuantumField";
 
 export const Route = createFileRoute("/a-ciencia-do-protocolo")({
@@ -260,6 +261,8 @@ function ACienciaDoProtocolo() {
           </div>
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }
