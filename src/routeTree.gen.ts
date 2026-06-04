@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TreinamentoMaestriaFrequencialRouteImport } from './routes/treinamento-maestria-frequencial'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RelatosRouteImport } from './routes/relatos'
 import { Route as PerformanceRouteImport } from './routes/performance'
@@ -30,6 +31,11 @@ const TreinamentoMaestriaFrequencialRoute =
     path: '/treinamento-maestria-frequencial',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/performance': typeof PerformanceRoute
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRoutesByTo {
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/performance': typeof PerformanceRoute
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRoutesById {
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/performance': typeof PerformanceRoute
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
 }
 export interface FileRouteTypes {
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/performance'
     | '/relatos'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/treinamento-maestria-frequencial'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/performance'
     | '/relatos'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/treinamento-maestria-frequencial'
   id:
     | '__root__'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/performance'
     | '/relatos'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/treinamento-maestria-frequencial'
   fileRoutesById: FileRoutesById
 }
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   PerformanceRoute: typeof PerformanceRoute
   RelatosRoute: typeof RelatosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TreinamentoMaestriaFrequencialRoute: typeof TreinamentoMaestriaFrequencialRoute
 }
 
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/treinamento-maestria-frequencial'
       fullPath: '/treinamento-maestria-frequencial'
       preLoaderRoute: typeof TreinamentoMaestriaFrequencialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -330,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   PerformanceRoute: PerformanceRoute,
   RelatosRoute: RelatosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TreinamentoMaestriaFrequencialRoute: TreinamentoMaestriaFrequencialRoute,
 }
 export const routeTree = rootRouteImport

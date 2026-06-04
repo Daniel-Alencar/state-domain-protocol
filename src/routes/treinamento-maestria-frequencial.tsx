@@ -4,8 +4,15 @@ import { QuantumField } from "@/components/QuantumField";
 export const Route = createFileRoute("/treinamento-maestria-frequencial")({
   head: () => ({
     meta: [
-      { title: "Treinamento em Maestria Frequencial — Protocolo Soberano de Harmonia Quântica" },
-      { name: "description", content: "Habilitação de Sinal: Por que a Maestria é Obrigatória para operar o Protocolo Soberano." },
+      { title: "Treinamento Empresarial em Maestria Frequencial — Harmonia Quântica e Ressonância Harmônica" },
+      { name: "description", content: "Treinamento empresarial em maestria frequencial: ressonância harmônica, harmonia quântica e física quântica aplicadas a líderes e equipes de alta performance." },
+      { name: "keywords", content: "treinamento empresarial, maestria frequencial, ressonância harmônica, harmonia quântica, física quântica, universo quântico, treinamento de liderança, performance executiva" },
+      { property: "og:title", content: "Treinamento Empresarial em Maestria Frequencial" },
+      { property: "og:description", content: "Habilitação de Sinal: harmonia quântica e ressonância harmônica aplicadas à liderança empresarial." },
+      { property: "og:url", content: "https://state-domain-protocol.lovable.app/treinamento-maestria-frequencial" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://state-domain-protocol.lovable.app/treinamento-maestria-frequencial" },
     ],
   }),
   component: TreinamentoMaestriaFrequencial,
