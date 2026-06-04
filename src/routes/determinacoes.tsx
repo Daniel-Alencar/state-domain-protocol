@@ -233,7 +233,7 @@ function Determinacoes() {
         </div>
 
         {/* ===== Engenharia de Volumes ===== */}
-        <div className="glass-panel mb-6 rounded-xl border border-elite/40 p-5">
+        <div className="glass-panel mb-6 rounded-xl border-2 border-elite/60 p-5">
           <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
             Engenharia de volumes
           </div>
