@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteFooter } from "@/components/SiteFooter";
 import { QuantumField } from "@/components/QuantumField";
 
 export const Route = createFileRoute("/como-utilizar")({
