@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { useEntitlement } from "@/lib/use-entitlement";
 import {
   addDetermination,
   removeDetermination,
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/determinacoes")({
 import { getAudioBlob } from "@/lib/determinations-audio";
 
 function Determinacoes() {
+  const ent = useEntitlement();
   const items = useDeterminations();
   const activeId = useActiveDetermination();
   const analyze = useServerFn(analyzeDetermination);
@@ -214,6 +216,41 @@ function Determinacoes() {
   }
 
   useEffect(() => () => stopRec(), []);
+
+  if (!ent.has("premium")) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="pt-10 mb-6">
+            <div className="text-mono text-tracked mb-3 text-[10px] text-signal">
+              Módulo 07 · Determinações
+            </div>
+            <h1 className="text-3xl font-light text-foreground md:text-4xl">
+              Voz em loop sobre frequência
+            </h1>
+          </div>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="mb-6 text-7xl text-muted-foreground/20">◻</div>
+            <div className="text-mono text-tracked mb-3 text-[10px] text-signal">Acesso restrito</div>
+            <h2 className="mb-2 text-2xl font-light text-foreground">Determinações</h2>
+            <p className="mb-2 max-w-sm text-sm text-muted-foreground">
+              Grave sua voz, obtenha análise de IA e rode em loop sobre as frequências dos
+              arquétipos. Recurso exclusivo do Plano Premium.
+            </p>
+            <p className="mb-8 text-mono text-tracked text-[10px] text-muted-foreground/60">
+              Requer plano Premium
+            </p>
+            <Link
+              to="/planos"
+              className="text-mono text-tracked rounded-full bg-foreground px-6 py-3 text-[11px] text-background hover:bg-foreground/90 transition-colors"
+            >
+              Ver planos de acesso
+            </Link>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

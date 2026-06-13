@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth-context";
+import { type PlanTier, PLAN_ORDER } from "./plans";
 
-export type PlanTier = "free" | "iniciado" | "soberano";
+export type { PlanTier };
 
 export type Entitlement = {
   tier: PlanTier;
   active: boolean;
   loading: boolean;
-  /** Access for a feature requiring a minimum tier */
+  /** Returns true if the user's plan meets the minimum required tier. */
   has: (min: PlanTier) => boolean;
 };
 
-const ORDER: Record<PlanTier, number> = { free: 0, iniciado: 1, soberano: 2 };
+// Maps legacy DB values ("iniciado", "soberano") to new tier names.
+function normalizeTier(raw: string | null | undefined): PlanTier {
+  if (raw === "iniciado") return "basico";
+  if (raw === "soberano") return "premium";
+  if (raw === "basico" || raw === "premium") return raw;
+  return "free";
+}
 
 export function useEntitlement(): Entitlement {
   const { user } = useAuth();
@@ -34,7 +41,7 @@ export function useEntitlement(): Entitlement {
       .maybeSingle()
       .then(({ data }) => {
         if (!alive) return;
-        setTier((data?.plan_tier as PlanTier) ?? "free");
+        setTier(normalizeTier(data?.plan_tier));
         setActive((data?.status ?? "active") === "active");
         setLoading(false);
       });
@@ -43,6 +50,6 @@ export function useEntitlement(): Entitlement {
 
   return {
     tier, active, loading,
-    has: (min) => active && ORDER[tier] >= ORDER[min],
+    has: (min) => active && PLAN_ORDER[tier] >= PLAN_ORDER[min],
   };
 }

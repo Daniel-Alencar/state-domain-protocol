@@ -9,11 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WebhookMpRouteImport } from './routes/webhook-mp'
 import { Route as TreinamentoMaestriaFrequencialRouteImport } from './routes/treinamento-maestria-frequencial'
 import { Route as TermosDeUsoRouteImport } from './routes/termos-de-uso'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RelatosRouteImport } from './routes/relatos'
+import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PerformanceRouteImport } from './routes/performance'
 import { Route as NetworkingRouteImport } from './routes/networking'
 import { Route as ManualRouteImport } from './routes/manual'
@@ -27,6 +29,11 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as ACienciaDoProtocoloRouteImport } from './routes/a-ciencia-do-protocolo'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WebhookMpRoute = WebhookMpRouteImport.update({
+  id: '/webhook-mp',
+  path: '/webhook-mp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TreinamentoMaestriaFrequencialRoute =
   TreinamentoMaestriaFrequencialRouteImport.update({
     id: '/treinamento-maestria-frequencial',
@@ -51,6 +58,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const RelatosRoute = RelatosRouteImport.update({
   id: '/relatos',
   path: '/relatos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanosRoute = PlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerformanceRoute = PerformanceRouteImport.update({
@@ -127,11 +139,13 @@ export interface FileRoutesByFullPath {
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
+  '/planos': typeof PlanosRoute
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
+  '/webhook-mp': typeof WebhookMpRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -146,11 +160,13 @@ export interface FileRoutesByTo {
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
+  '/planos': typeof PlanosRoute
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
+  '/webhook-mp': typeof WebhookMpRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -166,11 +182,13 @@ export interface FileRoutesById {
   '/manual': typeof ManualRoute
   '/networking': typeof NetworkingRoute
   '/performance': typeof PerformanceRoute
+  '/planos': typeof PlanosRoute
   '/relatos': typeof RelatosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
   '/treinamento-maestria-frequencial': typeof TreinamentoMaestriaFrequencialRoute
+  '/webhook-mp': typeof WebhookMpRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -187,11 +205,13 @@ export interface FileRouteTypes {
     | '/manual'
     | '/networking'
     | '/performance'
+    | '/planos'
     | '/relatos'
     | '/reset-password'
     | '/sitemap.xml'
     | '/termos-de-uso'
     | '/treinamento-maestria-frequencial'
+    | '/webhook-mp'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -206,11 +226,13 @@ export interface FileRouteTypes {
     | '/manual'
     | '/networking'
     | '/performance'
+    | '/planos'
     | '/relatos'
     | '/reset-password'
     | '/sitemap.xml'
     | '/termos-de-uso'
     | '/treinamento-maestria-frequencial'
+    | '/webhook-mp'
   id:
     | '__root__'
     | '/'
@@ -225,11 +247,13 @@ export interface FileRouteTypes {
     | '/manual'
     | '/networking'
     | '/performance'
+    | '/planos'
     | '/relatos'
     | '/reset-password'
     | '/sitemap.xml'
     | '/termos-de-uso'
     | '/treinamento-maestria-frequencial'
+    | '/webhook-mp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -245,15 +269,24 @@ export interface RootRouteChildren {
   ManualRoute: typeof ManualRoute
   NetworkingRoute: typeof NetworkingRoute
   PerformanceRoute: typeof PerformanceRoute
+  PlanosRoute: typeof PlanosRoute
   RelatosRoute: typeof RelatosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermosDeUsoRoute: typeof TermosDeUsoRoute
   TreinamentoMaestriaFrequencialRoute: typeof TreinamentoMaestriaFrequencialRoute
+  WebhookMpRoute: typeof WebhookMpRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/webhook-mp': {
+      id: '/webhook-mp'
+      path: '/webhook-mp'
+      fullPath: '/webhook-mp'
+      preLoaderRoute: typeof WebhookMpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/treinamento-maestria-frequencial': {
       id: '/treinamento-maestria-frequencial'
       path: '/treinamento-maestria-frequencial'
@@ -287,6 +320,13 @@ declare module '@tanstack/react-router' {
       path: '/relatos'
       fullPath: '/relatos'
       preLoaderRoute: typeof RelatosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planos': {
+      id: '/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof PlanosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/performance': {
@@ -389,11 +429,13 @@ const rootRouteChildren: RootRouteChildren = {
   ManualRoute: ManualRoute,
   NetworkingRoute: NetworkingRoute,
   PerformanceRoute: PerformanceRoute,
+  PlanosRoute: PlanosRoute,
   RelatosRoute: RelatosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermosDeUsoRoute: TermosDeUsoRoute,
   TreinamentoMaestriaFrequencialRoute: TreinamentoMaestriaFrequencialRoute,
+  WebhookMpRoute: WebhookMpRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
