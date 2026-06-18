@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { QuantumField } from "@/components/QuantumField";
 import { SiteFooter } from "@/components/SiteFooter";
+import { PLANS } from "@/lib/plans";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,6 +41,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Quantum field */}
@@ -110,38 +114,189 @@ function Landing() {
           em ambientes de decisão.
         </p>
 
-        <div className="flex flex-col items-center gap-3 sm:flex-row">
+        {/* CTA buttons */}
+        <div className="flex w-full max-w-3xl flex-col items-center gap-4">
+          {/* Primary: full-width */}
           <Link
             to="/app"
-            className="group inline-flex items-center gap-3 rounded-full bg-foreground px-7 py-3.5 text-base font-medium text-background transition-all hover:scale-[1.02]"
+            className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-foreground px-7 py-4 text-base font-medium text-background transition-all hover:scale-[1.01] hover:shadow-[0_0_30px_color-mix(in_oklab,var(--signal-glow)_25%,transparent)]"
           >
             Iniciar seu protocolo
             <span className="text-signal-glow text-base transition-transform group-hover:translate-x-1">→</span>
           </Link>
-          <Link
-            to="/arquetipos"
-            className="text-mono text-tracked rounded-full border border-border px-6 py-3 text-xs md:text-sm text-foreground/85 transition-colors hover:border-foreground hover:text-foreground"
-          >
-            Ver arquétipos
-          </Link>
-          <Link
-            to="/como-utilizar"
-            className="text-mono text-tracked rounded-full border border-signal/40 px-6 py-3 text-xs md:text-sm text-signal transition-all hover:border-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
-          >
-            Como Utilizar
-          </Link>
-          <Link
-            to="/a-ciencia-do-protocolo"
-            className="text-mono text-tracked rounded-full border border-border px-6 py-3 text-xs md:text-sm text-foreground/85 transition-colors hover:border-foreground hover:text-foreground"
-          >
-            A ciência do Protocolo
-          </Link>
-          <Link
-            to="/treinamento-maestria-frequencial"
-            className="text-mono text-tracked rounded-full border border-signal/40 px-6 py-3 text-xs md:text-sm text-signal transition-all hover:border-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
-          >
-            Treinamento em Maestria Frequencial
-          </Link>
+
+          {/* Secondary: grid of navigation buttons */}
+          <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <Link
+              to="/frequencias"
+              className="text-mono text-tracked rounded-full border border-signal/40 px-4 py-3 text-[11px] md:text-xs text-signal text-center transition-all hover:border-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
+            >
+              Ver frequências
+            </Link>
+            <Link
+              to="/arquetipos"
+              className="text-mono text-tracked rounded-full border border-border px-4 py-3 text-[11px] md:text-xs text-foreground/85 text-center transition-colors hover:border-foreground hover:text-foreground"
+            >
+              Ver arquétipos
+            </Link>
+            <Link
+              to="/como-utilizar"
+              className="text-mono text-tracked rounded-full border border-signal/40 px-4 py-3 text-[11px] md:text-xs text-signal text-center transition-all hover:border-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
+            >
+              Como Utilizar
+            </Link>
+            <Link
+              to="/a-ciencia-do-protocolo"
+              className="text-mono text-tracked rounded-full border border-border px-4 py-3 text-[11px] md:text-xs text-foreground/85 text-center transition-colors hover:border-foreground hover:text-foreground"
+            >
+              A ciência do Protocolo
+            </Link>
+            <Link
+              to="/treinamento-maestria-frequencial"
+              className="col-span-2 sm:col-span-1 lg:col-span-1 text-mono text-tracked rounded-full border border-signal/40 px-4 py-3 text-[11px] md:text-xs text-signal text-center transition-all hover:border-signal hover:shadow-[0_0_20px_color-mix(in_oklab,var(--signal-glow)_40%,transparent)]"
+            >
+              Maestria Frequencial
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Plans */}
+      <section className="relative z-10 border-t border-border/60 py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="mb-10 text-center">
+            <div className="text-mono text-tracked mb-3 text-[10px] text-signal">Módulo · Acesso</div>
+            <h2 className="text-3xl font-light text-foreground md:text-4xl">Planos de acesso</h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Escolha o nível de acesso ideal para sua jornada.
+            </p>
+          </div>
+
+          {/* Toggle mensal / anual */}
+          <div className="mb-8 flex justify-center">
+            <div className="flex rounded-full border border-border/60 bg-card/40 p-1">
+              <button
+                onClick={() => setBilling("monthly")}
+                className={`text-mono text-tracked rounded-full px-5 py-2 text-[11px] transition-colors ${
+                  billing === "monthly"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Mensal
+              </button>
+              <button
+                onClick={() => setBilling("annual")}
+                className={`text-mono text-tracked flex items-center gap-2 rounded-full px-5 py-2 text-[11px] transition-colors ${
+                  billing === "annual"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Anual
+                {billing !== "annual" && (
+                  <span className="rounded-full bg-signal/20 px-1.5 py-0.5 text-[9px] text-signal">
+                    até 36% off
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Cards de plano */}
+          <div className="grid gap-6 sm:grid-cols-3">
+            {PLANS.map((plan) => {
+              const price =
+                plan.id === "free"
+                  ? 0
+                  : billing === "monthly"
+                    ? plan.priceMonthly
+                    : plan.priceAnnual;
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`glass-panel relative flex flex-col overflow-hidden rounded-xl p-6 ${
+                    plan.highlight
+                      ? "border-signal/50 shadow-[0_0_40px_color-mix(in_oklab,var(--signal-glow)_15%,transparent)]"
+                      : ""
+                  }`}
+                >
+                  {plan.highlight && (
+                    <div className="text-mono text-tracked absolute right-3 top-3 rounded-full border border-signal/30 bg-signal/15 px-2 py-0.5 text-[9px] text-signal">
+                      Recomendado
+                    </div>
+                  )}
+
+                  <div className="mb-5 mt-5">
+                    <div className="text-2xl font-medium text-foreground">{plan.name}</div>
+                  </div>
+
+                  {plan.id === "free" ? (
+                    <div className="mb-6">
+                      <span className="text-4xl font-light text-foreground">Grátis</span>
+                      <div className="text-mono text-tracked mt-1 text-[10px] text-muted-foreground">
+                        sempre
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mb-6 space-y-1">
+                      <div>
+                        <span className="text-4xl font-light text-foreground">
+                          R${" "}
+                          {price.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                        <span className="text-mono text-tracked ml-1 text-[10px] text-muted-foreground">
+                          /{billing === "monthly" ? "mês" : "ano"}
+                        </span>
+                      </div>
+                      {billing === "annual" && (
+                        <div className="text-mono text-tracked text-[10px] text-signal">
+                          economize {plan.annualSavingsPct}% em relação ao mensal
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <ul className="mb-6 flex-1 space-y-2">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-foreground/90">
+                        <span className="mt-0.5 shrink-0 text-signal">✓</span>
+                        {f}
+                      </li>
+                    ))}
+                    {plan.locked.map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-2 text-sm text-muted-foreground/40 line-through"
+                      >
+                        <span className="mt-0.5 shrink-0">✕</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    to="/planos"
+                    className={`text-mono text-tracked w-full rounded-full px-4 py-2.5 text-center text-[11px] transition-colors ${
+                      plan.highlight
+                        ? "bg-foreground text-background hover:bg-foreground/90"
+                        : "border border-border/60 text-foreground/85 hover:border-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {plan.id === "free" ? "Começar grátis" : `Assinar ${plan.name}`}
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-8 text-center text-[11px] text-muted-foreground">
+            Pagamento processado pelo Mercado Pago · Cancele quando quiser
+          </p>
         </div>
       </section>
 

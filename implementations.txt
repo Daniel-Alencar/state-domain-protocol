@@ -1,0 +1,5 @@
+- Gostaria que o botão "Iniciar seu protocolo" ocupasse toda a linha, para facilitar o clique do usuário. Ao invés de ficar os botões divididos em colunas: "Iniciar seu protocolo", "Ver arquétipos", "Como utilizar", "A ciência do protocolo", "Treinamento em maestria frequencial"
+- Logo abaixo teríamos os botões "Ver arquétipos", "Como utilizar", "A ciência do protocolo", "Treinamento em maestria frequencial" divididos em colunas, do jeito como está atualmente. Mas, adicione o botão "Ver frequências" (antes de "Ver arquétipos") para que o usuário possa acessar as frequências diretamente, sem precisar acessar os arquétipos.
+- Ao clicar em ver frequências, o usuário é redirecionado para a página onde diz quais as frequências disponíveis, para que serve e como usar etc.
+- Ao clicar em ver arquétipos, o usuário é redirecionado para a página onde diz quais as arquétipos disponíveis e quaisquer outras informações relevantes sobre os arquétipos. Por enquanto, ainda não tenho toda a lista de arquétipos e o que cada um representa.
+- Coloque os planos de pamamento logo abaixo desses botões também.
