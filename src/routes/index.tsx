@@ -1,8 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { QuantumField } from "@/components/QuantumField";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PLANS } from "@/lib/plans";
+import { useAuth } from "@/lib/auth-context";
+import { redeemVoucher } from "@/lib/vouchers.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,6 +46,40 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [redeeming, setRedeeming] = useState(false);
+  const [voucherResult, setVoucherResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const doRedeem = useServerFn(redeemVoucher);
+
+  async function handleRedeem() {
+    if (!voucherCode.trim()) return;
+    if (!user) {
+      toast.info("Faça login para resgatar o voucher.");
+      navigate({ to: "/login", search: { redirect: "/planos" } });
+      return;
+    }
+    setRedeeming(true);
+    setVoucherResult(null);
+    try {
+      const res = await doRedeem({ data: { code: voucherCode.trim() } });
+      setVoucherResult({
+        ok: res.ok,
+        message: res.ok
+          ? `Acesso ${res.planTier === "premium" ? "Premium" : "Básico"} ativado! Redirecionando…`
+          : res.message,
+      });
+      if (res.ok) setTimeout(() => navigate({ to: "/app" }), 1800);
+    } catch (err: unknown) {
+      setVoucherResult({
+        ok: false,
+        message: err instanceof Error ? err.message : "Erro ao resgatar. Tente novamente.",
+      });
+    } finally {
+      setRedeeming(false);
+    }
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
@@ -297,6 +335,42 @@ function Landing() {
           <p className="mt-8 text-center text-[11px] text-muted-foreground">
             Pagamento processado pelo Mercado Pago · Cancele quando quiser
           </p>
+
+          {/* Voucher */}
+          <div className="mt-10 glass-panel rounded-xl border border-elite/30 p-6">
+            <div className="text-mono text-tracked mb-2 text-[10px] text-elite">
+              Acesso via voucher
+            </div>
+            <h3 className="text-xl font-light text-foreground mb-1">Tem um código de acesso?</h3>
+            <p className="mb-5 text-sm text-muted-foreground">
+              Insira o código para ativar acesso vitalício sem pagamento.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <input
+                value={voucherCode}
+                onChange={(e) => {
+                  setVoucherCode(e.target.value.toUpperCase());
+                  setVoucherResult(null);
+                }}
+                onKeyDown={(e) => e.key === "Enter" && handleRedeem()}
+                placeholder="XXXX-XXXX-XXXX"
+                className="flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-2.5 font-mono text-sm text-foreground tracking-widest focus:border-elite/60 focus:outline-none"
+              />
+              <button
+                disabled={redeeming || !voucherCode.trim()}
+                onClick={handleRedeem}
+                className="text-mono text-tracked rounded-full bg-foreground px-6 py-2.5 text-[11px] text-background disabled:opacity-40 transition-opacity"
+              >
+                {redeeming ? "Verificando…" : "Resgatar"}
+              </button>
+            </div>
+            {voucherResult && (
+              <p className={`mt-3 text-sm ${voucherResult.ok ? "text-signal" : "text-destructive"}`}>
+                {voucherResult.ok ? "✓ " : "✕ "}
+                {voucherResult.message}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
