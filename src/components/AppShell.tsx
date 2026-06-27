@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useEntitlement, type PlanTier } from "@/lib/use-entitlement";
 import { QuantumField } from "@/components/QuantumField";
 import { useActiveArchetype } from "@/lib/active-state";
+import { supabase } from "@/integrations/supabase/client";
 
 type NavItem = {
   to: string;
@@ -38,12 +39,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const ent = useEntitlement();
   const activeArchetype = useActiveArchetype();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate({ to: "/login", search: { redirect: pathname } });
     }
   }, [loading, user, navigate, pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => setIsAdmin(!!data));
+  }, [user]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -88,6 +101,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Desktop user area */}
           <div className="hidden items-center gap-4 md:flex">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="text-mono text-tracked text-[9px] text-signal/70 hover:text-signal transition-colors"
+              >
+                ADMIN
+              </Link>
+            )}
             <Link
               to="/planos"
               className="text-mono text-tracked text-[9px] text-elite hover:text-signal transition-colors"
@@ -202,6 +223,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     >
                       Plano {PLAN_LABEL[ent.tier]}
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-mono text-tracked text-[9px] text-signal/70"
+                      >
+                        · Admin
+                      </Link>
+                    )}
                   </div>
                 </div>
                 <button

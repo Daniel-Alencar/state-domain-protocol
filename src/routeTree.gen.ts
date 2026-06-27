@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as WebhookMpRouteImport } from './routes/webhook-mp'
 import { Route as TreinamentoMaestriaFrequencialRouteImport } from './routes/treinamento-maestria-frequencial'
 import { Route as TermosDeUsoRouteImport } from './routes/termos-de-uso'
@@ -29,6 +30,11 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as ACienciaDoProtocoloRouteImport } from './routes/a-ciencia-do-protocolo'
 import { Route as IndexRouteImport } from './routes/index'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WebhookMpRoute = WebhookMpRouteImport.update({
   id: '/webhook-mp',
   path: '/webhook-mp',
@@ -128,6 +134,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/a-ciencia-do-protocolo': typeof ACienciaDoProtocoloRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/a-ciencia-do-protocolo': typeof ACienciaDoProtocoloRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
@@ -171,6 +179,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/a-ciencia-do-protocolo': typeof ACienciaDoProtocoloRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/a-ciencia-do-protocolo'
     | '/app'
     | '/arquetipos'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/a-ciencia-do-protocolo'
     | '/app'
     | '/arquetipos'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/a-ciencia-do-protocolo'
     | '/app'
     | '/arquetipos'
@@ -258,6 +270,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   ACienciaDoProtocoloRoute: typeof ACienciaDoProtocoloRoute
   AppRoute: typeof AppRoute
   ArquetiposRoute: typeof ArquetiposRoute
@@ -280,6 +293,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/webhook-mp': {
       id: '/webhook-mp'
       path: '/webhook-mp'
@@ -418,6 +438,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   ACienciaDoProtocoloRoute: ACienciaDoProtocoloRoute,
   AppRoute: AppRoute,
   ArquetiposRoute: ArquetiposRoute,

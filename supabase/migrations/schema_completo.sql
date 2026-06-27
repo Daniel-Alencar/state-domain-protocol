@@ -1,6 +1,6 @@
 -- =============================================================
 -- SCHEMA COMPLETO — protocolo-soberano
--- Gerado a partir de 6 migrations (20260508 → 20260526)
+-- Gerado a partir de 6 migrations (20260508 → 20260526) + vouchers
 -- Aplique este arquivo via SQL Editor no seu Supabase próprio.
 -- =============================================================
 
@@ -13,11 +13,10 @@ CREATE TYPE public.app_role AS ENUM ('admin', 'moderator', 'user');
 
 
 -- ===============================================================
--- 2. FUNÇÕES AUXILIARES
--- (criadas antes das tabelas pois são referenciadas em triggers)
+-- 2. FUNÇÃO DE TRIGGER INDEPENDENTE
+-- (não referencia tabelas — pode vir antes delas)
 -- ===============================================================
 
--- Atualiza updated_at automaticamente
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -28,6 +27,111 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+
+-- ===============================================================
+-- 3. TABELAS
+-- (precisam existir antes das funções que as referenciam)
+-- ===============================================================
+
+-- ---- user_roles -----------------------------------------------
+CREATE TABLE public.user_roles (
+  id         uuid            PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    uuid            NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  role       public.app_role NOT NULL DEFAULT 'user',
+  created_at timestamptz     NOT NULL DEFAULT now(),
+  UNIQUE (user_id, role)
+);
+
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+-- ---- profiles -------------------------------------------------
+CREATE TABLE public.profiles (
+  id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      uuid        NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  display_name text,
+  avatar_url   text,
+  bio          text,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- ---- sessions -------------------------------------------------
+CREATE TABLE public.sessions (
+  id               uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id          uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  archetype_id     text,
+  frequency_ids    text[]      DEFAULT '{}',
+  duration_seconds integer     NOT NULL DEFAULT 0,
+  started_at       timestamptz NOT NULL DEFAULT now(),
+  created_at       timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_sessions_user_started ON public.sessions (user_id, started_at DESC);
+
+-- ---- reports --------------------------------------------------
+CREATE TABLE public.reports (
+  id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title        text        NOT NULL,
+  body         text        NOT NULL,
+  archetype_id text,
+  status       text        NOT NULL DEFAULT 'pending', -- pending | validated | rejected
+  validated_at timestamptz,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
+
+-- ---- subscriptions --------------------------------------------
+CREATE TABLE public.subscriptions (
+  id                 uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id            uuid        NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  status             text        NOT NULL DEFAULT 'active',  -- active | canceled | past_due
+  plan_tier          text        NOT NULL DEFAULT 'free',    -- free | iniciado | soberano
+  current_period_end timestamptz,
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- ---- vouchers -------------------------------------------------
+CREATE TABLE public.vouchers (
+  id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  code            text        NOT NULL UNIQUE,
+  plan_tier       text        NOT NULL DEFAULT 'premium',   -- basico | premium
+  max_redemptions integer     NOT NULL DEFAULT 1,
+  redeemed_count  integer     NOT NULL DEFAULT 0,
+  expires_at      timestamptz,                              -- NULL = sem expiração de resgate
+  created_by      uuid        REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at      timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.vouchers ENABLE ROW LEVEL SECURITY;
+
+-- ---- voucher_redemptions --------------------------------------
+CREATE TABLE public.voucher_redemptions (
+  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  voucher_id  uuid        NOT NULL REFERENCES public.vouchers(id) ON DELETE CASCADE,
+  user_id     uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_email  text,
+  redeemed_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (voucher_id, user_id)
+);
+
+ALTER TABLE public.voucher_redemptions ENABLE ROW LEVEL SECURITY;
+
+
+-- ===============================================================
+-- 4. FUNÇÕES QUE REFERENCIAM TABELAS
+-- (criadas após as tabelas que elas consultam)
+-- ===============================================================
 
 -- Verifica se um usuário possui determinado papel
 CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role public.app_role)
@@ -46,8 +150,8 @@ $$;
 -- Retorna estatísticas do usuário autenticado
 CREATE OR REPLACE FUNCTION public.get_my_stats()
 RETURNS TABLE (
-  total_sessions   integer,
-  active_streak    integer,
+  total_sessions    integer,
+  active_streak     integer,
   validated_reports integer
 )
 LANGUAGE plpgsql
@@ -127,82 +231,9 @@ $$;
 
 
 -- ===============================================================
--- 3. TABELAS
+-- 5. TRIGGERS
 -- ===============================================================
 
--- ---- user_roles -----------------------------------------------
-CREATE TABLE public.user_roles (
-  id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id    uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  role       public.app_role NOT NULL DEFAULT 'user',
-  created_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (user_id, role)
-);
-
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
-
--- ---- profiles -------------------------------------------------
-CREATE TABLE public.profiles (
-  id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      uuid        NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
-  display_name text,
-  avatar_url   text,
-  bio          text,
-  created_at   timestamptz NOT NULL DEFAULT now(),
-  updated_at   timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
--- ---- sessions -------------------------------------------------
-CREATE TABLE public.sessions (
-  id               uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id          uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  archetype_id     text,
-  frequency_ids    text[]      DEFAULT '{}',
-  duration_seconds integer     NOT NULL DEFAULT 0,
-  started_at       timestamptz NOT NULL DEFAULT now(),
-  created_at       timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX idx_sessions_user_started ON public.sessions (user_id, started_at DESC);
-
--- ---- reports --------------------------------------------------
-CREATE TABLE public.reports (
-  id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  title        text        NOT NULL,
-  body         text        NOT NULL,
-  archetype_id text,
-  status       text        NOT NULL DEFAULT 'pending', -- pending | validated | rejected
-  validated_at timestamptz,
-  created_at   timestamptz NOT NULL DEFAULT now(),
-  updated_at   timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
-
--- ---- subscriptions --------------------------------------------
-CREATE TABLE public.subscriptions (
-  id                 uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id            uuid        NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
-  status             text        NOT NULL DEFAULT 'active',  -- active | canceled | past_due
-  plan_tier          text        NOT NULL DEFAULT 'free',    -- free | iniciado | soberano
-  current_period_end timestamptz,
-  created_at         timestamptz NOT NULL DEFAULT now(),
-  updated_at         timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
-
-
--- ===============================================================
--- 4. TRIGGERS
--- ===============================================================
-
--- updated_at automático
 CREATE TRIGGER profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -215,19 +246,17 @@ CREATE TRIGGER subscriptions_updated_at
   BEFORE UPDATE ON public.subscriptions
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- Garante que apenas o e-mail autorizado receba o papel de admin
 CREATE TRIGGER enforce_admin_email_insert
   BEFORE INSERT OR UPDATE ON public.user_roles
   FOR EACH ROW EXECUTE FUNCTION public.enforce_admin_email();
 
--- Cria perfil/papel/assinatura automaticamente ao registrar novo usuário
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 
 -- ===============================================================
--- 5. ROW LEVEL SECURITY — POLICIES
+-- 6. ROW LEVEL SECURITY — POLICIES
 -- ===============================================================
 
 -- ---- user_roles -----------------------------------------------
@@ -303,7 +332,6 @@ CREATE POLICY "subscription select own"
   ON public.subscriptions FOR SELECT TO authenticated
   USING (auth.uid() = user_id);
 
--- Usuário só pode inserir assinatura gratuita para si mesmo
 CREATE POLICY "subscriptions insert own free"
   ON public.subscriptions FOR INSERT TO authenticated
   WITH CHECK (
@@ -313,15 +341,30 @@ CREATE POLICY "subscriptions insert own free"
     AND current_period_end IS NULL
   );
 
--- Apenas admins podem alterar planos/status de assinatura
 CREATE POLICY "admins manage subs"
   ON public.subscriptions FOR ALL TO authenticated
   USING      (public.has_role(auth.uid(), 'admin'))
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
+-- ---- vouchers -------------------------------------------------
+CREATE POLICY "admins manage vouchers"
+  ON public.vouchers FOR ALL TO authenticated
+  USING      (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+-- ---- voucher_redemptions --------------------------------------
+CREATE POLICY "admins manage redemptions"
+  ON public.voucher_redemptions FOR ALL TO authenticated
+  USING      (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "users see own redemptions"
+  ON public.voucher_redemptions FOR SELECT TO authenticated
+  USING (auth.uid() = user_id);
+
 
 -- ===============================================================
--- 6. PERMISSÕES DAS FUNÇÕES
+-- 7. PERMISSÕES DAS FUNÇÕES
 -- ===============================================================
 
 -- Funções de trigger: nenhum papel executa diretamente
@@ -338,7 +381,7 @@ GRANT  EXECUTE ON FUNCTION public.get_my_stats() TO authenticated;
 
 
 -- ===============================================================
--- 7. SEED — papel de admin para o e-mail autorizado
+-- 8. SEED — papel de admin para o e-mail autorizado
 -- (executa apenas se o usuário já existir no banco)
 -- ===============================================================
 
