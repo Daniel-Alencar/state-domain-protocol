@@ -1,5 +1,11 @@
 import "./lib/error-capture";
 
+// Node.js 20 não tem WebSocket nativo — polyfill para o cliente Supabase Realtime
+import ws from "ws";
+if (typeof globalThis.WebSocket === "undefined") {
+  (globalThis as unknown as Record<string, unknown>).WebSocket = ws;
+}
+
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
