@@ -9,7 +9,7 @@ const InputSchema = z.object({
 export const analyzeDetermination = createServerFn({ method: "POST" })
   .inputValidator((input) => InputSchema.parse(input))
   .handler(async ({ data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.GOOGLE_AI_API_KEY;
     if (!apiKey) {
       return { suggestedArchetypes: [] as string[], rationale: "IA indisponível." };
     }
@@ -29,7 +29,7 @@ Regras:
 - Devolva um JSON com a forma exata pedida via tool calling.`;
 
     const body = {
-      model: "google/gemini-2.5-flash",
+      model: "gemini-2.5-flash",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: `Determinação transcrita:\n"""${data.transcript}"""` },
@@ -60,7 +60,7 @@ Regras:
     };
 
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify(body),
