@@ -1,4 +1,5 @@
 import "./lib/error-capture";
+import "./lib/supabase-keepalive";
 
 // Node.js 20 não tem WebSocket nativo — polyfill para o cliente Supabase Realtime
 import ws from "ws";

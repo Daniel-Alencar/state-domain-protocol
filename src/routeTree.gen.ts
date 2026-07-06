@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as WebhookMpRouteImport } from './routes/webhook-mp'
 import { Route as TreinamentoMaestriaFrequencialRouteImport } from './routes/treinamento-maestria-frequencial'
 import { Route as TermosDeUsoRouteImport } from './routes/termos-de-uso'
@@ -27,14 +26,10 @@ import { Route as DeterminacoesRouteImport } from './routes/determinacoes'
 import { Route as ComoUtilizarRouteImport } from './routes/como-utilizar'
 import { Route as ArquetiposRouteImport } from './routes/arquetipos'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ACienciaDoProtocoloRouteImport } from './routes/a-ciencia-do-protocolo'
 import { Route as IndexRouteImport } from './routes/index'
 
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WebhookMpRoute = WebhookMpRouteImport.update({
   id: '/webhook-mp',
   path: '/webhook-mp',
@@ -121,6 +116,11 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ACienciaDoProtocoloRoute = ACienciaDoProtocoloRouteImport.update({
   id: '/a-ciencia-do-protocolo',
   path: '/a-ciencia-do-protocolo',
@@ -134,8 +134,8 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/a-ciencia-do-protocolo': typeof ACienciaDoProtocoloRoute
+  '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/como-utilizar': typeof ComoUtilizarRoute
@@ -156,8 +156,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/a-ciencia-do-protocolo': typeof ACienciaDoProtocoloRoute
+  '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/como-utilizar': typeof ComoUtilizarRoute
@@ -179,8 +179,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/a-ciencia-do-protocolo': typeof ACienciaDoProtocoloRoute
+  '/admin': typeof AdminRoute
   '/app': typeof AppRoute
   '/arquetipos': typeof ArquetiposRoute
   '/como-utilizar': typeof ComoUtilizarRoute
@@ -203,8 +203,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
     | '/a-ciencia-do-protocolo'
+    | '/admin'
     | '/app'
     | '/arquetipos'
     | '/como-utilizar'
@@ -225,8 +225,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/a-ciencia-do-protocolo'
+    | '/admin'
     | '/app'
     | '/arquetipos'
     | '/como-utilizar'
@@ -247,8 +247,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/admin'
     | '/a-ciencia-do-protocolo'
+    | '/admin'
     | '/app'
     | '/arquetipos'
     | '/como-utilizar'
@@ -270,8 +270,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
   ACienciaDoProtocoloRoute: typeof ACienciaDoProtocoloRoute
+  AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRoute
   ArquetiposRoute: typeof ArquetiposRoute
   ComoUtilizarRoute: typeof ComoUtilizarRoute
@@ -293,13 +293,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/webhook-mp': {
       id: '/webhook-mp'
       path: '/webhook-mp'
@@ -419,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/a-ciencia-do-protocolo': {
       id: '/a-ciencia-do-protocolo'
       path: '/a-ciencia-do-protocolo'
@@ -438,8 +438,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
   ACienciaDoProtocoloRoute: ACienciaDoProtocoloRoute,
+  AdminRoute: AdminRoute,
   AppRoute: AppRoute,
   ArquetiposRoute: ArquetiposRoute,
   ComoUtilizarRoute: ComoUtilizarRoute,
